@@ -1,0 +1,2 @@
+# Enforce LF line endings for Gradle wrapper shell script on all platforms
+poddrive/gradlew text eol=lf

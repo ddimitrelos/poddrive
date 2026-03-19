@@ -1,0 +1,4 @@
+app_identifier("com.poddrive.ios")
+package_name("com.poddrive.android")
+
+# apple_id and google_json_key_file configured before first release

@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# KMP / Gradle (poddrive/)
+poddrive/.gradle/
+poddrive/build/
+poddrive/shared/build/
+poddrive/androidApp/build/
+poddrive/local.properties
+poddrive/*.local.properties
+
+# iOS / Xcode
+poddrive/iosApp/iosApp.xcodeproj/xcuserdata/
+poddrive/iosApp/iosApp.xcworkspace/
+*.xcuserstate
+*.xcbkptlist
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/

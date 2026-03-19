@@ -1,0 +1,102 @@
+# generated: 2026-03-19
+# last_updated: 2026-03-19
+# project: BMAD Test
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-03-19
+last_updated: 2026-03-19  # updated by dev-story
+project: BMAD Test
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: Project Foundation & Spotify Authentication
+  epic-1: in-progress
+  1-1-kmp-monorepo-and-build-foundation: in-progress
+  1-2-shared-infrastructure-database-error-handling-and-secure-storage: backlog
+  1-3-spotify-oauth-20-pkce-authentication: backlog
+  1-4-silent-spotify-token-refresh: backlog
+  1-5-revoke-spotify-access: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2: Podcast Library & Tier Management
+  epic-2: backlog
+  2-1-fetch-and-display-podcast-library: backlog
+  2-2-loved-liked-tier-assignment-and-management: backlog
+  2-3-tier-filter-tabs-on-shows-screen: backlog
+  2-4-local-episode-cache: backlog
+  2-5-background-library-sync-and-staleness-indicator: backlog
+  2-6-add-first-show-onboarding-flow: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: Drive Session & Spoken Briefing
+  epic-3: backlog
+  3-1-drive-session-state-machine-and-background-service: backlog
+  3-2-bluetooth-audio-device-detection-and-auto-session-activation: backlog
+  3-3-manual-drive-session-trigger: backlog
+  3-4-tts-spoken-briefing-generation-and-delivery: backlog
+  3-5-audio-ducking-and-hands-free-playback-confirmation: backlog
+  3-6-drive-mode-ui-dashboard-screen: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: Spotify Playback & Episode Queue
+  epic-4: backlog
+  4-1-spotify-episode-deep-link-handoff: backlog
+  4-2-priority-episode-queue: backlog
+  4-3-auto-advance-to-next-episode: backlog
+  4-4-playback-position-resumption: backlog
+  4-5-spotify-playback-failure-handling: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: Empty Inbox & Smart Recommendations
+  epic-5: backlog
+  5-1-empty-inbox-recommendation-generation: backlog
+  5-2-hands-free-accept-or-decline-of-recommendation: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: Resilience, Recovery & Error Handling
+  epic-6: backlog
+  6-1-spotify-api-connection-failure-voice-notification: backlog
+  6-2-spotify-api-timeout-recovery-and-request-retry: backlog
+  6-3-os-mid-drive-process-kill-session-state-recovery: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7: Privacy, Settings & Accessibility Polish
+  epic-7: backlog
+  7-1-data-transparency-view-stored-data: backlog
+  7-2-full-data-reset: backlog
+  7-3-design-token-system-implementation: backlog
+  7-4-accessibility-compliance-and-responsive-design: backlog
+  epic-7-retrospective: optional

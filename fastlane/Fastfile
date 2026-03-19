@@ -1,0 +1,21 @@
+default_platform(:ios)
+
+platform :android do
+  desc "Submit a new build to Google Play Internal Testing"
+  lane :android_beta do
+    # Credentials configured before first release:
+    # gradle(task: "bundle", build_type: "Release", project_dir: "poddrive/")
+    # upload_to_play_store(track: "internal")
+    UI.message("Android beta lane stub — configure credentials for first release")
+  end
+end
+
+platform :ios do
+  desc "Submit a new build to TestFlight"
+  lane :ios_beta do
+    # Credentials configured before first release:
+    # build_app(scheme: "iosApp", project: "poddrive/iosApp/iosApp.xcodeproj")
+    # upload_to_testflight
+    UI.message("iOS beta lane stub — configure credentials for first release")
+  end
+end
