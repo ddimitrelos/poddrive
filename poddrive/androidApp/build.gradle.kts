@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     implementation(libs.compose.material3)
     implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.androidx.appcompat)
 
     debugImplementation(libs.compose.ui.tooling)
 }
