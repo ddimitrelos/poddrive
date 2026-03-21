@@ -35,7 +35,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('poddrive/gradle/libs.versions.toml', 'poddrive/**/*.gradle.kts', 'poddrive/gradle/wrapper/gradle-wrapper.properties') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('poddrive/gradle/libs.versions.toml', 'poddrive/**/*.gradle.kts', 'poddrive/gradle/wrapper/gradle-wrapper.properties', 'poddrive/gradle.properties') }}
           restore-keys: |
             gradle-${{ runner.os }}-
 

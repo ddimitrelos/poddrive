@@ -1,11 +1,11 @@
 package com.poddrive
 
 import kotlin.test.Test
-import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class PlatformTest {
     @Test
-    fun platformNotNull() {
-        assertNotNull(platform())
+    fun platformReturnsNonEmptyString() {
+        assertTrue(platform().isNotEmpty(), "platform() must return a non-empty string")
     }
 }

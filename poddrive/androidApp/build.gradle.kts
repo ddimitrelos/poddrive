@@ -56,4 +56,6 @@ dependencies {
     implementation(libs.androidx.appcompat)
 
     debugImplementation(libs.compose.ui.tooling)
+
+    androidTestImplementation(libs.androidx.test.runner)
 }

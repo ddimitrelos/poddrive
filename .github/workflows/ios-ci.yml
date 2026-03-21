@@ -10,6 +10,7 @@ on:
     branches: [ master ]
     paths:
       - 'poddrive/**'
+      - '.github/workflows/ios-ci.yml'
 
 defaults:
   run:
@@ -27,7 +28,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'gradle'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('poddrive/gradle/libs.versions.toml', 'poddrive/**/*.gradle.kts', 'poddrive/gradle/wrapper/gradle-wrapper.properties', 'poddrive/gradle.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
