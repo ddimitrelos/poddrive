@@ -44,7 +44,7 @@ story_location: _bmad-output/implementation-artifacts
 development_status:
   # Epic 1: Project Foundation & Spotify Authentication
   epic-1: in-progress
-  1-1-kmp-monorepo-and-build-foundation: in-progress
+  1-1-kmp-monorepo-and-build-foundation: done
   1-2-shared-infrastructure-database-error-handling-and-secure-storage: backlog
   1-3-spotify-oauth-20-pkce-authentication: backlog
   1-4-silent-spotify-token-refresh: backlog

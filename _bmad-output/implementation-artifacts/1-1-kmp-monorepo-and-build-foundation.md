@@ -1,6 +1,6 @@
 # Story 1.1: KMP Monorepo & Build Foundation
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -139,12 +139,12 @@ From [Source: architecture.md#Naming Patterns]:
   - Runner: `ubuntu-latest`
   - Java: 17 (required for AGP 8.x)
   - Steps: checkout → `actions/setup-java@v4` (Java 17, Temurin) → `./gradlew :androidApp:assembleDebug :shared:testDebugUnitTest`
-  - Trigger: `push` to `main`, `pull_request`
+  - Trigger: `push` to `master`, `pull_request`
 
 - **iOS workflow** (`ios-ci.yml`):
   - Runner: `macos-latest` (required for Xcode toolchain)
-  - Steps: checkout → `./gradlew :shared:assembleXCFramework` → `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 15" build`
-  - Trigger: `push` to `main`, `pull_request`
+  - Steps: checkout → `./gradlew :shared:assembleXCFramework` → `xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -sdk iphonesimulator -destination "platform=iOS Simulator,name=iPhone 16,OS=18.5" build`
+  - Trigger: `push` to `master`, `pull_request`
   - Note: Gradle XCFramework build MUST run before xcodebuild — iosApp depends on the generated framework
 
 - **Fastlane** (stub configuration for now — credentials added before first release):
