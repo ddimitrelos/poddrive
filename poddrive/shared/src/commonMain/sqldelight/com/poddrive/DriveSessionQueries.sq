@@ -21,8 +21,10 @@ CREATE TABLE playback_state (
 
 -- Queries: drive_sessions
 
+-- Secondary sort on updated_at ensures deterministic result when two sessions share
+-- the same started_at (e.g. test data, clock-resolution collision).
 selectLatestSession:
-SELECT * FROM drive_sessions ORDER BY started_at DESC LIMIT 1;
+SELECT * FROM drive_sessions ORDER BY started_at DESC, updated_at DESC LIMIT 1;
 
 selectSessionById:
 SELECT * FROM drive_sessions WHERE id = ?;
@@ -34,8 +36,11 @@ VALUES (?, ?, ?, ?, ?);
 updateSessionState:
 UPDATE drive_sessions SET state = ?, updated_at = ? WHERE id = ?;
 
+-- Guard: only end a session that is not already in the 'Ended' state, so that a double-call
+-- cannot overwrite the original ended_at timestamp and corrupt session-duration calculations.
 endSession:
-UPDATE drive_sessions SET state = 'Ended', ended_at = ?, updated_at = ? WHERE id = ?;
+UPDATE drive_sessions SET state = 'Ended', ended_at = ?, updated_at = ?
+WHERE id = ? AND state != 'Ended';
 
 deleteAllSessions:
 DELETE FROM drive_sessions;

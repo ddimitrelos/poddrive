@@ -31,12 +31,16 @@ import platform.Security.kSecValueData
  * iOS implementation of SecureStorage using the Keychain (Security framework).
  * Service: "com.poddrive"; items stored as kSecClassGenericPassword.
  * Strategy on save: SecItemUpdate first; if errSecItemNotFound → SecItemAdd.
+ * All Keychain errors are surfaced as IllegalStateException so callers cannot silently
+ * proceed with missing or partially-written credentials.
  * [Source: architecture.md#Authentication & Security, NFR6]
  */
 @OptIn(ExperimentalForeignApi::class)
 actual class SecureStorage {
 
     actual fun saveTokens(accessToken: String, refreshToken: String) {
+        require(accessToken.isNotEmpty()) { "accessToken must not be empty" }
+        require(refreshToken.isNotEmpty()) { "refreshToken must not be empty" }
         saveItem(KEY_ACCESS_TOKEN, accessToken)
         saveItem(KEY_REFRESH_TOKEN, refreshToken)
     }
@@ -46,8 +50,14 @@ actual class SecureStorage {
     actual fun getRefreshToken(): String? = readItem(KEY_REFRESH_TOKEN)
 
     actual fun clear() {
-        deleteItem(KEY_ACCESS_TOKEN)
-        deleteItem(KEY_REFRESH_TOKEN)
+        // Delete both items; collect any error and throw after attempting both deletes
+        // so we always attempt cleanup of the second token even if the first fails.
+        val accessError = runCatching { deleteItem(KEY_ACCESS_TOKEN) }.exceptionOrNull()
+        val refreshError = runCatching { deleteItem(KEY_REFRESH_TOKEN) }.exceptionOrNull()
+        val firstError = accessError ?: refreshError
+        if (firstError != null) {
+            throw IllegalStateException("Keychain clear failed: ${firstError.message}", firstError)
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -55,18 +65,31 @@ actual class SecureStorage {
     // ---------------------------------------------------------------------------
 
     private fun saveItem(key: String, value: String) {
-        val data = value.toNSData() ?: return
+        val data = value.toNSData()
+            ?: throw IllegalStateException("Failed to encode value for key '$key' to NSData")
+
         val searchQuery = buildBaseQuery(key)
 
-        // Attempt update; if item doesn't exist yet, add it
+        // Attempt update first; only add if the item does not yet exist
         val updateAttributes = NSMutableDictionary()
         updateAttributes.setValue(data, forKey = kSecValueData as String)
         val updateStatus = SecItemUpdate(searchQuery, updateAttributes)
 
-        if (updateStatus == errSecItemNotFound) {
-            val addQuery = buildBaseQuery(key)
-            addQuery.setValue(data, forKey = kSecValueData as String)
-            SecItemAdd(addQuery, null)
+        when {
+            updateStatus == errSecSuccess -> return
+            updateStatus == errSecItemNotFound -> {
+                val addQuery = buildBaseQuery(key)
+                addQuery.setValue(data, forKey = kSecValueData as String)
+                val addStatus = SecItemAdd(addQuery, null)
+                if (addStatus != errSecSuccess) {
+                    throw IllegalStateException(
+                        "Keychain SecItemAdd failed for key '$key' with status $addStatus"
+                    )
+                }
+            }
+            else -> throw IllegalStateException(
+                "Keychain SecItemUpdate failed for key '$key' with status $updateStatus"
+            )
         }
     }
 
@@ -78,17 +101,25 @@ actual class SecureStorage {
         return memScoped {
             val resultRef = alloc<CFTypeRefVar>()
             val status = SecItemCopyMatching(query, resultRef.ptr)
-            if (status == errSecSuccess) {
-                @Suppress("UNCHECKED_CAST")
-                (resultRef.value as? NSData)?.toKotlinString()
-            } else {
-                null
+            when (status) {
+                errSecSuccess -> {
+                    @Suppress("UNCHECKED_CAST")
+                    (resultRef.value as? NSData)?.toKotlinString()
+                }
+                errSecItemNotFound -> null
+                else -> null // item unreadable (e.g. device locked) — treat as absent
             }
         }
     }
 
     private fun deleteItem(key: String) {
-        SecItemDelete(buildBaseQuery(key))
+        val status = SecItemDelete(buildBaseQuery(key))
+        // errSecItemNotFound is acceptable — item was already absent
+        if (status != errSecSuccess && status != errSecItemNotFound) {
+            throw IllegalStateException(
+                "Keychain SecItemDelete failed for key '$key' with status $status"
+            )
+        }
     }
 
     private fun buildBaseQuery(key: String): NSMutableDictionary {

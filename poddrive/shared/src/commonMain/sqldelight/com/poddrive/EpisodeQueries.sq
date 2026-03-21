@@ -15,6 +15,7 @@ CREATE TABLE episodes (
 CREATE TABLE episode_tiers (
     episode_id TEXT NOT NULL PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,
     tier TEXT NOT NULL DEFAULT 'NONE'
+        CHECK (tier IN ('LOVED', 'LIKED', 'NONE'))
 );
 
 -- Queries: episodes
@@ -44,9 +45,17 @@ ORDER BY
     END,
     e.published_at DESC;
 
+-- INSERT OR IGNORE + UPDATE avoids DELETE + re-INSERT, so ON DELETE CASCADE on episode_tiers
+-- is never triggered by a routine episode sync upsert. Tier rows are preserved.
 upsertEpisode:
-INSERT OR REPLACE INTO episodes(id, podcast_id, title, duration_ms, published_at, is_played)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO episodes(id, podcast_id, title, duration_ms, published_at, is_played)
+VALUES (?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO UPDATE SET
+    podcast_id = excluded.podcast_id,
+    title = excluded.title,
+    duration_ms = excluded.duration_ms,
+    published_at = excluded.published_at,
+    is_played = excluded.is_played;
 
 markPlayed:
 UPDATE episodes SET is_played = 1 WHERE id = ?;

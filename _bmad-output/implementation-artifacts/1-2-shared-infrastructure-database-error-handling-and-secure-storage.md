@@ -1,6 +1,6 @@
 # Story 1.2: Shared Infrastructure — Database, Error Handling & Secure Storage
 
-Status: review
+Status: done
 
 ## Story
 
@@ -11,13 +11,13 @@ so that all subsequent features have a consistent, tested foundation for data pe
 ## Acceptance Criteria
 
 1. **Given** the KMP monorepo from Story 1.1 **When** the shared infrastructure layer is added **Then** SQLDelight 2.x is configured in `shared/build.gradle.kts` with the Gradle plugin and platform drivers wired via `expect/actual`: `AndroidSqliteDriver` on Android, `NativeSqliteDriver` on iOS (AR3, AR4)
-2. **Given** the SQLDelight configuration **Then** all 5 schema entities are defined as `.sq` files: `podcasts`, `episodes`, `episode_tiers`, `playback_state`, `drive_sessions` — primary keys are `TEXT` (Spotify URIs / UUIDs), all timestamps are `INTEGER` (Unix ms), foreign keys enforce referential integrity
+2. **Given** the SQLDelight configuration **Then** all 5 schema entities are defined across `.sq` files: `podcasts`, `episodes`, `episode_tiers`, `playback_state`, `drive_sessions` — co-location of related tables in one `.sq` file is permitted (e.g. `episode_tiers` with `episodes`, `playback_state` with `drive_sessions`) — primary keys are `TEXT` (Spotify URIs / UUIDs), all timestamps are `INTEGER` (Unix ms), foreign keys enforce referential integrity
 3. **Given** the shared module **Then** `AppError` sealed class exists at `commonMain/.../domain/model/AppError.kt` with subtypes: `SpotifyApiError(code: Int, message: String)`, `NetworkUnavailable`, `SpotifyNotInstalled`, `RateLimitExceeded`, `Unknown(cause: Throwable)` (AR5)
 4. **Given** `AppError` **Then** a custom two-parameter `Result<out T, out E>` sealed class (`Success<T>` / `Failure<E>`) is defined in `commonMain/.../domain/model/Result.kt` — all KMP use case stubs use `Result<T, AppError>`; no exceptions cross the KMP boundary (AR5)
 5. **Given** the expect/actual framework **Then** `SecureStorage` expect class is declared at `commonMain/.../storage/SecureStorage.kt` with exactly these operations: `fun saveTokens(accessToken: String, refreshToken: String)`, `fun getAccessToken(): String?`, `fun getRefreshToken(): String?`, `fun clear()` (AR4)
 6. **Given** the `SecureStorage` expect **Then** `androidMain` actual uses `EncryptedSharedPreferences` (security-crypto 1.0.0); `iosMain` actual uses iOS Keychain via `Security` framework (`SecItemAdd` / `SecItemCopyMatching` / `SecItemUpdate` / `SecItemDelete`) — credentials NEVER stored in SQLDelight or plain-text `SharedPreferences` (NFR6)
 7. **Given** the complete infrastructure layer **Then** unit tests in `commonTest` verify: all 5 `AppError` subtypes construct correctly; `Result.Success` and `Result.Failure` wrapping / unwrapping work correctly
-8. **Given** the `SecureStorage` actuals **Then** platform tests verify read, write, and delete round-trips on both Android and iOS
+8. **Given** the `SecureStorage` actuals **Then** platform tests verify read, write, and delete round-trips on both Android and iOS — Android: `androidInstrumentedTest` (requires emulator/device, runs on `android-ci.yml`); iOS: `iosTest` source set (runs on `ios-ci.yml` `macos-latest`)
 
 ## Tasks / Subtasks
 

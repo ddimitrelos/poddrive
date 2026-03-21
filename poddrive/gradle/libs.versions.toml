@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.0.21"
-agp = "8.7.3"
+agp = "8.13.2"
 compose-bom = "2024.09.03"
 compose-compiler = "2.0.21"
 minSdk = "29"

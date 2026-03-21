@@ -9,6 +9,18 @@ plugins {
 }
 
 kotlin {
+    // Suppress expect/actual class warning for all targets (Kotlin 2.x requires this flag
+    // when expect class constructors differ between actuals, e.g. Android needs Context).
+    targets.configureEach {
+        compilations.configureEach {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
+            }
+        }
+    }
+
     androidTarget {
         compilations.all {
             compileTaskProvider.configure {
@@ -39,6 +51,10 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.androidx.security.crypto)
+        }
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.test.runner)
+            implementation(kotlin("test"))
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)

@@ -10,7 +10,8 @@ CREATE TABLE podcasts (
     description TEXT NOT NULL DEFAULT '',
     image_url TEXT NOT NULL DEFAULT '',
     episode_count INTEGER NOT NULL DEFAULT 0,
-    tier TEXT NOT NULL DEFAULT 'NONE',
+    tier TEXT NOT NULL DEFAULT 'NONE'
+        CHECK (tier IN ('LOVED', 'LIKED', 'NONE')),
     last_synced_at INTEGER NOT NULL DEFAULT 0
 );
 
@@ -42,5 +43,6 @@ DELETE FROM podcasts;
 countAll:
 SELECT COUNT(*) FROM podcasts;
 
+-- COALESCE returns 0 when the table is empty rather than propagating NULL to callers.
 selectMostRecentSyncTime:
-SELECT MAX(last_synced_at) FROM podcasts;
+SELECT COALESCE(MAX(last_synced_at), 0) FROM podcasts;

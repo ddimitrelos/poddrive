@@ -13,23 +13,30 @@ import androidx.security.crypto.MasterKey
 actual class SecureStorage(private val context: Context) {
 
     private val prefs by lazy {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        EncryptedSharedPreferences.create(
-            context,
-            FILE_NAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        try {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                context,
+                FILE_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to initialise EncryptedSharedPreferences: ${e.message}", e)
+        }
     }
 
     actual fun saveTokens(accessToken: String, refreshToken: String) {
-        prefs.edit()
+        require(accessToken.isNotEmpty()) { "accessToken must not be empty" }
+        require(refreshToken.isNotEmpty()) { "refreshToken must not be empty" }
+        val committed = prefs.edit()
             .putString(KEY_ACCESS_TOKEN, accessToken)
             .putString(KEY_REFRESH_TOKEN, refreshToken)
-            .apply()
+            .commit()
+        check(committed) { "EncryptedSharedPreferences commit failed for saveTokens" }
     }
 
     actual fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
@@ -37,7 +44,8 @@ actual class SecureStorage(private val context: Context) {
     actual fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
 
     actual fun clear() {
-        prefs.edit().clear().apply()
+        val committed = prefs.edit().clear().commit()
+        check(committed) { "EncryptedSharedPreferences commit failed for clear" }
     }
 
     private companion object {
