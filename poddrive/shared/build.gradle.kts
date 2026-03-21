@@ -52,10 +52,6 @@ kotlin {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.androidx.security.crypto)
         }
-        androidInstrumentedTest.dependencies {
-            implementation(libs.androidx.test.runner)
-            implementation(kotlin("test"))
-        }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
         }
@@ -73,6 +69,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+// Android instrumented test dependencies (not wired via KMP sourceSets — use AGP convention)
+dependencies {
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }
 
 sqldelight {

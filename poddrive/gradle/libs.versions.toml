@@ -11,6 +11,7 @@ activityCompose = "1.9.0"
 lifecycle = "2.8.2"
 appcompat = "1.7.0"
 test-runner = "1.6.2"
+test-ext-junit = "1.2.1"
 # Story 1.2: Shared infrastructure dependencies
 sqldelight = "2.0.2"
 coroutines = "1.8.1"
@@ -27,6 +28,7 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "test-runner" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "test-ext-junit" }
 # Story 1.2: Shared infrastructure
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
