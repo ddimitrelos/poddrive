@@ -11,6 +11,10 @@ activityCompose = "1.9.0"
 lifecycle = "2.8.2"
 appcompat = "1.7.0"
 test-runner = "1.6.2"
+# Story 1.2: Shared infrastructure dependencies
+sqldelight = "2.0.2"
+coroutines = "1.8.1"
+security-crypto = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,6 +27,12 @@ compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "test-runner" }
+# Story 1.2: Shared infrastructure
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
+sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
+sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "security-crypto" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -31,3 +41,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "compose-compiler" }
+# Story 1.2
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

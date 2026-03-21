@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -29,16 +30,18 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Story 1.2+: SQLDelight, Ktor, etc. added here
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.sqldelight.coroutines.extensions)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
         androidMain.dependencies {
-            // Story 1.2+
+            implementation(libs.sqldelight.android.driver)
+            implementation(libs.androidx.security.crypto)
         }
         iosMain.dependencies {
-            // Story 1.2+
+            implementation(libs.sqldelight.native.driver)
         }
     }
 }
@@ -53,5 +56,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+sqldelight {
+    databases {
+        create("PodDrive") {
+            packageName.set("com.poddrive.db")
+        }
     }
 }
