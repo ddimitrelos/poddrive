@@ -11,13 +11,14 @@
 		A1000001000000000000002A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000002B /* ContentView.swift */; };
 		A1000001000000000000003A /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000003B /* Theme.swift */; };
 		A1000001000000000000004A /* shared.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = A1000001000000000000004B /* shared.xcframework */; };
+		A1000001000000000000005A /* shared.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A1000001000000000000004B /* shared.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		A1000001000000000000001B /* PodDriveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodDriveApp.swift; sourceTree = "<group>"; };
 		A1000001000000000000002B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000001000000000000003B /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		A1000001000000000000004B /* shared.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = shared.xcframework; path = "../shared/build/XCFrameworks/debug/shared.xcframework"; sourceTree = "<group>"; };
+		A1000001000000000000004B /* shared.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = shared.xcframework; path = "../shared/build/XCFrameworks/debug/shared.xcframework"; sourceTree = SOURCE_ROOT; };
 		A1000001000000000000005B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1000001000000000000006B /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -32,6 +33,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A10000010000000000000180 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A1000001000000000000005A /* shared.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
 		A1000001000000000000008A /* Products */ = {
@@ -95,6 +110,7 @@
 			buildPhases = (
 				A10000010000000000000100 /* Sources */,
 				A1000001000000000000007A /* Frameworks */,
+				A10000010000000000000180 /* Embed Frameworks */,
 				A10000010000000000000110 /* Resources */,
 			);
 			buildRules = (
