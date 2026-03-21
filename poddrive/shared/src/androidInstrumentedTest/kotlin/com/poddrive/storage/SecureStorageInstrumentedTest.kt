@@ -2,11 +2,11 @@ package com.poddrive.storage
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.runner.RunWith
 
 /**
@@ -19,14 +19,14 @@ class SecureStorageInstrumentedTest {
 
     private lateinit var secureStorage: SecureStorage
 
-    @BeforeTest
+    @Before
     fun setUp() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         secureStorage = SecureStorage(context)
         secureStorage.clear()
     }
 
-    @AfterTest
+    @After
     fun tearDown() {
         secureStorage.clear()
     }

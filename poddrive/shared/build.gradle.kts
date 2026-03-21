@@ -81,6 +81,8 @@ sqldelight {
     databases {
         create("PodDrive") {
             packageName.set("com.poddrive.db")
+            // minSdk=29 (Android 10) ships with SQLite 3.28; 3.24 dialect enables upsert syntax.
+            dialect("app.cash.sqldelight:sqlite-3-24-dialect:2.0.2")
         }
     }
 }

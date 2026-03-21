@@ -2,25 +2,25 @@ package com.poddrive.storage
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKeys
 
 /**
  * Android implementation of SecureStorage using EncryptedSharedPreferences.
  * Keys are encrypted with AES256-SIV; values with AES256-GCM.
  * Backed by Android Keystore — credentials survive app restart but not device reset.
+ * Uses security-crypto 1.0.0 stable API (MasterKeys / AES256_GCM_SPEC).
  * [Source: architecture.md#Authentication & Security, NFR6]
  */
 actual class SecureStorage(private val context: Context) {
 
     private val prefs by lazy {
         try {
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
+            // MasterKeys.getOrCreate is the stable 1.0.0 API; MasterKey.Builder is alpha-only.
+            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
             EncryptedSharedPreferences.create(
-                context,
                 FILE_NAME,
-                masterKey,
+                masterKeyAlias,
+                context,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
