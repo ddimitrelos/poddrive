@@ -2,11 +2,20 @@ package com.poddrive.android
 
 import android.app.Application
 import com.poddrive.api.SpotifyAuthManager
+import com.poddrive.api.SpotifyLibraryApiClient
 import com.poddrive.api.createAuthHttpClient
 import com.poddrive.api.createSpotifyHttpClient
-import io.ktor.client.HttpClient
+import com.poddrive.db.PodDrive
+import com.poddrive.repository.EpisodeRepository
+import com.poddrive.repository.PodcastRepository
+import com.poddrive.storage.DatabaseDriverFactory
 import com.poddrive.storage.SecureStorage
+import com.poddrive.storage.SqlDelightEpisodeRepository
+import com.poddrive.storage.SqlDelightPodcastRepository
 import com.poddrive.usecase.AuthenticateWithSpotifyUseCase
+import com.poddrive.usecase.RevokeSpotifyAccessUseCase
+import com.poddrive.usecase.SyncPodcastLibraryUseCase
+import io.ktor.client.HttpClient
 
 class PodDriveApplication : Application() {
 
@@ -30,6 +39,21 @@ class PodDriveApplication : Application() {
         private set
 
     lateinit var authenticateWithSpotifyUseCase: AuthenticateWithSpotifyUseCase
+        private set
+
+    lateinit var revokeSpotifyAccessUseCase: RevokeSpotifyAccessUseCase
+        private set
+
+    lateinit var database: PodDrive
+        private set
+
+    lateinit var podcastRepository: PodcastRepository
+        private set
+
+    lateinit var episodeRepository: EpisodeRepository
+        private set
+
+    lateinit var syncPodcastLibraryUseCase: SyncPodcastLibraryUseCase
         private set
 
     override fun onCreate() {
@@ -63,6 +87,14 @@ class PodDriveApplication : Application() {
             tokenRefresher = authManager
         )
         authenticateWithSpotifyUseCase = AuthenticateWithSpotifyUseCase(authManager)
+        revokeSpotifyAccessUseCase = RevokeSpotifyAccessUseCase(authManager)
+
+        val dbFactory = DatabaseDriverFactory(applicationContext)
+        database = PodDrive(dbFactory.createDriver())
+        podcastRepository = SqlDelightPodcastRepository(database)
+        episodeRepository = SqlDelightEpisodeRepository(database)
+        val libraryApiClient = SpotifyLibraryApiClient(apiHttpClient)
+        syncPodcastLibraryUseCase = SyncPodcastLibraryUseCase(libraryApiClient, podcastRepository, episodeRepository)
     }
 
     companion object {

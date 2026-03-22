@@ -46,3 +46,20 @@ SELECT COUNT(*) FROM podcasts;
 -- COALESCE returns 0 when the table is empty rather than propagating NULL to callers.
 selectMostRecentSyncTime:
 SELECT COALESCE(MAX(last_synced_at), 0) FROM podcasts;
+
+selectAllWithUnheardCount:
+SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at,
+       COALESCE(COUNT(e.id), 0) AS unheard_count
+FROM podcasts p
+LEFT JOIN episodes e ON p.id = e.podcast_id AND e.is_played = 0
+GROUP BY p.id
+ORDER BY p.name ASC;
+
+selectAllWithUnheardCountByTier:
+SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at,
+       COALESCE(COUNT(e.id), 0) AS unheard_count
+FROM podcasts p
+LEFT JOIN episodes e ON p.id = e.podcast_id AND e.is_played = 0
+WHERE p.tier = ?
+GROUP BY p.id
+ORDER BY p.name ASC;

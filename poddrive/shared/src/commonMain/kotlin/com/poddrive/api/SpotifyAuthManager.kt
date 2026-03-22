@@ -119,6 +119,21 @@ class SpotifyAuthManager(
     }
 
     /**
+     * User-initiated token revocation (Story 1.5).
+     *
+     * Clears all stored tokens from [tokenStorage], forcing the user back to the
+     * unauthenticated state. Called by [RevokeSpotifyAccessUseCase] in response to
+     * the "Disconnect Spotify" user action.
+     *
+     * Token lifecycle rule: ONLY [SpotifyAuthManager] calls [SecureTokenStorage.clear]
+     * or [SecureTokenStorage.saveTokens]. This is the public revocation entry point.
+     * [Source: architecture.md#Process Patterns]
+     */
+    fun revokeAccess() {
+        tokenStorage.clear()
+    }
+
+    /**
      * Silently exchanges [refreshToken] for a fresh access token (Story 1.4).
      *
      * Implements [TokenRefresher] — called by the Ktor `Auth` plugin on 401 responses.

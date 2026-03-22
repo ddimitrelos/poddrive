@@ -16,6 +16,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Story 1.3: Spotify Client ID — set via -PSPOTIFY_CLIENT_ID=... or gradle.properties
+        buildConfigField(
+            "String",
+            "SPOTIFY_CLIENT_ID",
+            "\"${findProperty("SPOTIFY_CLIENT_ID") ?: ""}\""
+        )
     }
 
     buildTypes {
@@ -39,6 +46,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -54,6 +62,11 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)
+    // Story 1.3: Chrome Custom Tabs for OAuth + ViewModel for Compose
+    implementation(libs.androidx.browser)
+    implementation(libs.lifecycle.viewmodel.compose)
+    // Story 1.3: expose HttpClient type used in PodDriveApplication
+    implementation(libs.ktor.client.core)
 
     debugImplementation(libs.compose.ui.tooling)
 

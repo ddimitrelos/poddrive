@@ -36,20 +36,20 @@ import platform.Security.kSecValueData
  * [Source: architecture.md#Authentication & Security, NFR6]
  */
 @OptIn(ExperimentalForeignApi::class)
-actual class SecureStorage {
+actual class SecureStorage : SecureTokenStorage {
 
-    actual fun saveTokens(accessToken: String, refreshToken: String) {
+    actual override fun saveTokens(accessToken: String, refreshToken: String) {
         require(accessToken.isNotEmpty()) { "accessToken must not be empty" }
         require(refreshToken.isNotEmpty()) { "refreshToken must not be empty" }
         saveItem(KEY_ACCESS_TOKEN, accessToken)
         saveItem(KEY_REFRESH_TOKEN, refreshToken)
     }
 
-    actual fun getAccessToken(): String? = readItem(KEY_ACCESS_TOKEN)
+    actual override fun getAccessToken(): String? = readItem(KEY_ACCESS_TOKEN)
 
-    actual fun getRefreshToken(): String? = readItem(KEY_REFRESH_TOKEN)
+    actual override fun getRefreshToken(): String? = readItem(KEY_REFRESH_TOKEN)
 
-    actual fun clear() {
+    actual override fun clear() {
         // Delete both items; collect any error and throw after attempting both deletes
         // so we always attempt cleanup of the second token even if the first fails.
         val accessError = runCatching { deleteItem(KEY_ACCESS_TOKEN) }.exceptionOrNull()

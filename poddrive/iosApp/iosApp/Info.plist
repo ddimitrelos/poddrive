@@ -25,6 +25,18 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<!-- Story 1.3: OAuth redirect URL scheme — poddrive://callback -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.poddrive.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>poddrive</string>
+			</array>
+		</dict>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

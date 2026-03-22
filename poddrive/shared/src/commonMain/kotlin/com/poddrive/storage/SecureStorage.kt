@@ -11,9 +11,9 @@ package com.poddrive.storage
  * - Only SpotifyApiClient (Story 1.3) may call saveTokens() / clear().
  * [Source: architecture.md#Authentication & Security]
  */
-expect class SecureStorage {
-    fun saveTokens(accessToken: String, refreshToken: String)
-    fun getAccessToken(): String?
-    fun getRefreshToken(): String?
-    fun clear()
+expect class SecureStorage : SecureTokenStorage {
+    override fun saveTokens(accessToken: String, refreshToken: String)
+    override fun getAccessToken(): String?
+    override fun getRefreshToken(): String?
+    override fun clear()
 }

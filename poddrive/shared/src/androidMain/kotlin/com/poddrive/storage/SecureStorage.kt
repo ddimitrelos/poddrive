@@ -11,7 +11,7 @@ import androidx.security.crypto.MasterKeys
  * Uses security-crypto 1.0.0 stable API (MasterKeys / AES256_GCM_SPEC).
  * [Source: architecture.md#Authentication & Security, NFR6]
  */
-actual class SecureStorage(private val context: Context) {
+actual class SecureStorage(private val context: Context) : SecureTokenStorage {
 
     private val prefs by lazy {
         try {
@@ -29,7 +29,7 @@ actual class SecureStorage(private val context: Context) {
         }
     }
 
-    actual fun saveTokens(accessToken: String, refreshToken: String) {
+    actual override fun saveTokens(accessToken: String, refreshToken: String) {
         require(accessToken.isNotEmpty()) { "accessToken must not be empty" }
         require(refreshToken.isNotEmpty()) { "refreshToken must not be empty" }
         val committed = prefs.edit()
@@ -39,11 +39,11 @@ actual class SecureStorage(private val context: Context) {
         check(committed) { "EncryptedSharedPreferences commit failed for saveTokens" }
     }
 
-    actual fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
+    actual override fun getAccessToken(): String? = prefs.getString(KEY_ACCESS_TOKEN, null)
 
-    actual fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
+    actual override fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
 
-    actual fun clear() {
+    actual override fun clear() {
         val committed = prefs.edit().clear().commit()
         check(committed) { "EncryptedSharedPreferences commit failed for clear" }
     }

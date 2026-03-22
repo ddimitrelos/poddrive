@@ -44,16 +44,29 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.sqldelight.coroutines.extensions)
+            // Story 1.3: Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(libs.ktor.client.mock)
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.androidx.security.crypto)
+            // Story 1.3: Ktor CIO engine for Android
+            implementation(libs.ktor.client.cio)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
+            // Story 1.3: Ktor Darwin engine for iOS
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
