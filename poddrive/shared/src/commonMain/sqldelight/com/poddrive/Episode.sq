@@ -28,6 +28,9 @@ SELECT * FROM episodes
 WHERE podcast_id = ? AND is_played = 0
 ORDER BY published_at DESC;
 
+countUnplayedByPodcast:
+SELECT COUNT(*) FROM episodes WHERE podcast_id = ? AND is_played = 0;
+
 selectAllUnplayed:
 SELECT * FROM episodes WHERE is_played = 0 ORDER BY published_at DESC;
 

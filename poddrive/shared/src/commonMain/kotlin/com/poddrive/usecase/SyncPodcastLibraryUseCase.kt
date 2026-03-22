@@ -98,6 +98,7 @@ class SyncPodcastLibraryUseCase(
 internal fun parseSpotifyDateToEpochMs(releaseDate: String): Long {
     val parts = releaseDate.split("-")
     val year = parts.getOrNull(0)?.toIntOrNull() ?: return 0L
+    if (year <= 0) return 0L  // treat year 0000 / BC dates as unknown (avoids negative epoch)
     val month = parts.getOrNull(1)?.toIntOrNull() ?: 1
     val day = parts.getOrNull(2)?.toIntOrNull() ?: 1
     // Proleptic Gregorian → Julian Day Number (standard Fliegel-Van Flandern algorithm)

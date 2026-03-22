@@ -57,10 +57,12 @@ class MainActivity : ComponentActivity() {
     /**
      * Called when the OAuth redirect (poddrive://callback) arrives.
      * launchMode="singleTop" ensures this activity is reused rather than recreated (AC4).
+     * Scheme guard matches onCreate — prevents non-OAuth intents from reaching the auth handler.
      */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        onboardingViewModel.handleOAuthRedirect(intent)
+        intent.takeIf { it.data?.scheme == "poddrive" }
+            ?.let { onboardingViewModel.handleOAuthRedirect(it) }
     }
 }

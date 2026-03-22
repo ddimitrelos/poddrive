@@ -14,6 +14,7 @@ import com.poddrive.storage.SqlDelightEpisodeRepository
 import com.poddrive.storage.SqlDelightPodcastRepository
 import com.poddrive.usecase.AuthenticateWithSpotifyUseCase
 import com.poddrive.usecase.RevokeSpotifyAccessUseCase
+import com.poddrive.usecase.SetEpisodeTierUseCase
 import com.poddrive.usecase.SyncPodcastLibraryUseCase
 import io.ktor.client.HttpClient
 
@@ -56,6 +57,9 @@ class PodDriveApplication : Application() {
     lateinit var syncPodcastLibraryUseCase: SyncPodcastLibraryUseCase
         private set
 
+    lateinit var setEpisodeTierUseCase: SetEpisodeTierUseCase
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -95,6 +99,7 @@ class PodDriveApplication : Application() {
         episodeRepository = SqlDelightEpisodeRepository(database)
         val libraryApiClient = SpotifyLibraryApiClient(apiHttpClient)
         syncPodcastLibraryUseCase = SyncPodcastLibraryUseCase(libraryApiClient, podcastRepository, episodeRepository)
+        setEpisodeTierUseCase = SetEpisodeTierUseCase(podcastRepository)
     }
 
     companion object {

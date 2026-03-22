@@ -44,7 +44,7 @@ class SqlDelightPodcastRepository(private val db: PodDrive) : PodcastRepository 
                 imageUrl = row.image_url,
                 episodeCount = row.episode_count.toInt(),
                 unheardEpisodeCount = row.unheard_count.toInt(),
-                tier = EpisodeTier.valueOf(row.tier),
+                tier = EpisodeTier.entries.find { it.name == row.tier } ?: EpisodeTier.NONE,
                 lastSyncedAt = row.last_synced_at
             )
         }
@@ -58,8 +58,12 @@ class SqlDelightPodcastRepository(private val db: PodDrive) : PodcastRepository 
                 imageUrl = row.image_url,
                 episodeCount = row.episode_count.toInt(),
                 unheardEpisodeCount = row.unheard_count.toInt(),
-                tier = EpisodeTier.valueOf(row.tier),
+                tier = EpisodeTier.entries.find { it.name == row.tier } ?: EpisodeTier.NONE,
                 lastSyncedAt = row.last_synced_at
             )
         }
+
+    override fun setPodcastTier(id: String, tier: EpisodeTier) {
+        db.podcastQueries.updateTier(tier = tier.name, id = id)
+    }
 }

@@ -51,6 +51,8 @@ class SyncPodcastLibraryUseCaseTest {
 
         override fun getByTierWithUnheardCount(tier: String): List<Podcast> =
             stored.filter { it.tier.name == tier }
+
+        override fun setPodcastTier(id: String, tier: EpisodeTier) = Unit
     }
 
     private class FakeEpisodeRepository : EpisodeRepository {

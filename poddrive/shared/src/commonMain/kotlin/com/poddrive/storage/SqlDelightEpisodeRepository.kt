@@ -26,5 +26,5 @@ class SqlDelightEpisodeRepository(private val db: PodDrive) : EpisodeRepository 
     }
 
     override fun getUnheardCountForPodcast(podcastId: String): Int =
-        db.episodeQueries.selectUnplayedByPodcast(podcastId).executeAsList().size
+        db.episodeQueries.countUnplayedByPodcast(podcastId).executeAsOne().toInt()
 }

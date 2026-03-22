@@ -12,6 +12,7 @@ private val PodDriveDarkColorScheme = darkColorScheme(
     onBackground = Color.White,
     onSurface = Color.White,
     onPrimary = Color.Black,
+    surfaceVariant = Color(0xFF272736),
 )
 
 @Composable

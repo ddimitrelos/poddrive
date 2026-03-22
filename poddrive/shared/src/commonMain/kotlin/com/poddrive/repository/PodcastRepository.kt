@@ -1,5 +1,6 @@
 package com.poddrive.repository
 
+import com.poddrive.domain.model.EpisodeTier
 import com.poddrive.domain.model.Podcast
 
 /**
@@ -14,4 +15,6 @@ interface PodcastRepository {
     fun getAllWithUnheardCount(): List<Podcast>
     /** Returns all podcasts for the given tier with unheard counts. */
     fun getByTierWithUnheardCount(tier: String): List<Podcast>
+    /** Updates the tier for a single podcast by ID. Use EpisodeTier.NONE to remove the tag. */
+    fun setPodcastTier(id: String, tier: EpisodeTier)         // ← ADD (Story 2.2)
 }

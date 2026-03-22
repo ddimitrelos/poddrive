@@ -1,24 +1,22 @@
 import SwiftUI
-import shared  // KMP shared framework
+import shared
 
 @main
 struct PodDriveApp: App {
 
     @State private var isAuthenticated = false
 
-    // All dependencies built once in init(), sharing a single DB connection and auth manager.
     private let syncUseCase: SyncPodcastLibraryUseCase
+    private let setTierUseCase: SetEpisodeTierUseCase
     private let podcastRepository: any PodcastRepository
     private let revokeUseCase: RevokeSpotifyAccessUseCase
 
     init() {
-        // Shared DB — single connection for both sync writes and cache reads (P1-2 fix)
         let dbFactory = DatabaseDriverFactory()
         let db = PodDrive(driver: dbFactory.createDriver())
         let podcastRepo = SqlDelightPodcastRepository(db: db)
         let episodeRepo = SqlDelightEpisodeRepository(db: db)
 
-        // Auth dependencies — shared so revokeUseCase and syncUseCase operate on the same token state
         let storage = SecureStorage()
         let authHttpClient = SpotifyHttpClientKt.createAuthHttpClient()
         let clientId = Bundle.main.infoDictionary?["SPOTIFY_CLIENT_ID"] as? String ?? ""
@@ -34,6 +32,7 @@ struct PodDriveApp: App {
             episodeRepository: episodeRepo
         )
         podcastRepository = podcastRepo
+        setTierUseCase = SetEpisodeTierUseCase(podcastRepository: podcastRepo)  // ← ADD (Story 2.2)
     }
 
     var body: some Scene {
@@ -41,6 +40,7 @@ struct PodDriveApp: App {
             if isAuthenticated {
                 HomeView(
                     syncUseCase: syncUseCase,
+                    setTierUseCase: setTierUseCase,                         // ← ADD (Story 2.2)
                     podcastRepository: podcastRepository,
                     revokeUseCase: revokeUseCase,
                     onRevoked: { isAuthenticated = false }
