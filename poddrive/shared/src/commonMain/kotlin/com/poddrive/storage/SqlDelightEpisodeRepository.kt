@@ -2,6 +2,7 @@ package com.poddrive.storage
 
 import com.poddrive.db.PodDrive
 import com.poddrive.domain.model.Episode
+import com.poddrive.domain.model.EpisodeTier
 import com.poddrive.repository.EpisodeRepository
 
 /**
@@ -27,4 +28,17 @@ class SqlDelightEpisodeRepository(private val db: PodDrive) : EpisodeRepository 
 
     override fun getUnheardCountForPodcast(podcastId: String): Int =
         db.episodeQueries.countUnplayedByPodcast(podcastId).executeAsOne().toInt()
+
+    override fun getUnplayedOrderedByTier(): List<Episode> =
+        db.episodeQueries.selectUnplayedOrderedByTier().executeAsList().map { row ->
+            Episode(
+                id = row.id,
+                podcastId = row.podcast_id,
+                title = row.title,
+                durationMs = row.duration_ms,
+                publishedAt = row.published_at,
+                isPlayed = row.is_played != 0L,
+                tier = EpisodeTier.valueOf(row.tier)
+            )
+        }
 }

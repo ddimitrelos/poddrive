@@ -75,12 +75,12 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Spotify Playback & Episode Queue
-  epic-4: backlog
+  epic-4: in-progress
   4-1-spotify-episode-deep-link-handoff: backlog
-  4-2-priority-episode-queue: backlog
+  4-2-priority-episode-queue: review
   4-3-auto-advance-to-next-episode: backlog
   4-4-playback-position-resumption: backlog
-  4-5-spotify-playback-failure-handling: backlog
+  4-5-spotify-playback-failure-handling: review
   epic-4-retrospective: optional
 
   # Epic 5: Empty Inbox & Smart Recommendations
