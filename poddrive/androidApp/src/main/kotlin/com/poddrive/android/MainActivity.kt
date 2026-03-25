@@ -12,15 +12,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.poddrive.android.ui.drive.DriveSessionScreen
+import com.poddrive.android.ui.drive.DriveSessionViewModel
 import com.poddrive.android.ui.home.HomeScreen
 import com.poddrive.android.ui.onboarding.OnboardingScreen
 import com.poddrive.android.ui.onboarding.OnboardingUiState
 import com.poddrive.android.ui.onboarding.OnboardingViewModel
 import com.poddrive.android.ui.theme.PodDriveTheme
+import com.poddrive.domain.model.DriveSessionState
 
 class MainActivity : ComponentActivity() {
 
     private val onboardingViewModel: OnboardingViewModel by viewModels()
+    private val driveViewModel: DriveSessionViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,16 +42,31 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val uiState by onboardingViewModel.uiState.collectAsState()
+                    val sessionState by driveViewModel.sessionState.collectAsState()
 
-                    if (uiState is OnboardingUiState.Authenticated) {
-                        HomeScreen(onRevoked = { onboardingViewModel.resetToIdle() })
-                    } else {
-                        OnboardingScreen(
-                            onAuthenticated = {
-                                // Navigation handled reactively via uiState above
-                            },
-                            viewModel = onboardingViewModel
-                        )
+                    // Determine whether a drive session is active
+                    val isDriveActive = sessionState !is DriveSessionState.Idle &&
+                        sessionState !is DriveSessionState.Ended
+
+                    when {
+                        uiState !is OnboardingUiState.Authenticated -> {
+                            OnboardingScreen(
+                                onAuthenticated = {
+                                    // Navigation handled reactively via uiState above
+                                },
+                                viewModel = onboardingViewModel
+                            )
+                        }
+                        isDriveActive -> {
+                            // Full-screen drive session — back suppressed in DriveSessionScreen
+                            DriveSessionScreen(viewModel = driveViewModel)
+                        }
+                        else -> {
+                            HomeScreen(
+                                onRevoked = { onboardingViewModel.resetToIdle() },
+                                driveViewModel = driveViewModel
+                            )
+                        }
                     }
                 }
             }

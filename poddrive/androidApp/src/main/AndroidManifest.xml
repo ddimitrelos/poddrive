@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:name=".PodDriveApplication"
@@ -26,6 +28,13 @@
                 <data android:scheme="poddrive" android:host="callback" />
             </intent-filter>
         </activity>
+
+        <!-- Drive session foreground service — keeps process alive for background audio (FR12) -->
+        <!-- Stories 3.2, 4.2 -->
+        <service
+            android:name=".service.DriveSessionForegroundService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
     </application>
 
 </manifest>

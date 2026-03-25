@@ -22,7 +22,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     sealed class UiState {
         data object Loading : UiState()
-        data class Success(val podcasts: List<Podcast>) : UiState()
+        data class Success(
+            val podcasts: List<Podcast>,
+            /** True when library cache is >24h old (FR32, Story 2.5). */
+            val isStale: Boolean = false
+        ) : UiState()
         data class Error(
             val message: String,
             val cachedPodcasts: List<Podcast> = emptyList()

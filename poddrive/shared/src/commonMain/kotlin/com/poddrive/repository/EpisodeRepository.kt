@@ -12,4 +12,10 @@ interface EpisodeRepository {
     fun upsertAll(episodes: List<Episode>)
     /** Returns the number of unheard episodes for the given podcast URI. */
     fun getUnheardCountForPodcast(podcastId: String): Int
+    /**
+     * Returns all unplayed episodes ordered by tier priority (LOVED → LIKED → NONE)
+     * and then by most recent publication date descending within each tier.
+     * Used by [BuildEpisodeQueueUseCase] to build the drive session queue (FR22, Story 4.2).
+     */
+    fun getUnplayedOrderedByTier(): List<Episode>
 }

@@ -64,6 +64,8 @@ class SyncPodcastLibraryUseCaseTest {
 
         override fun getUnheardCountForPodcast(podcastId: String): Int =
             upserted.count { it.podcastId == podcastId && !it.isPlayed }
+
+        override fun getUnplayedOrderedByTier(): List<Episode> = upserted.filter { !it.isPlayed }
     }
 
     // -----------------------------------------------------------------------
