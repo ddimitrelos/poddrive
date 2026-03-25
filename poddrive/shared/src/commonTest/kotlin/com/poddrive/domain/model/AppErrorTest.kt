@@ -86,6 +86,7 @@ class AppErrorTest {
             AppError.NetworkUnavailable,
             AppError.SpotifyNotInstalled,
             AppError.RateLimitExceeded,
+            AppError.SpotifyHandoffTimeout,
             AppError.Unknown(RuntimeException("test"))
         )
 
@@ -96,6 +97,7 @@ class AppErrorTest {
                 AppError.NetworkUnavailable -> "NetworkUnavailable"
                 AppError.SpotifyNotInstalled -> "SpotifyNotInstalled"
                 AppError.RateLimitExceeded -> "RateLimitExceeded"
+                AppError.SpotifyHandoffTimeout -> "SpotifyHandoffTimeout"
                 is AppError.Unknown -> "Unknown"
             }
             assertNotNull(label)

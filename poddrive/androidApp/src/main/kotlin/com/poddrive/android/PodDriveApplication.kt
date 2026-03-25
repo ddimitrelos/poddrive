@@ -6,13 +6,17 @@ import com.poddrive.api.SpotifyLibraryApiClient
 import com.poddrive.api.createAuthHttpClient
 import com.poddrive.api.createSpotifyHttpClient
 import com.poddrive.db.PodDrive
+import com.poddrive.repository.DriveSessionRepository
 import com.poddrive.repository.EpisodeRepository
 import com.poddrive.repository.PodcastRepository
+import com.poddrive.session.DriveSessionManager
 import com.poddrive.storage.DatabaseDriverFactory
 import com.poddrive.storage.SecureStorage
+import com.poddrive.storage.SqlDelightDriveSessionRepository
 import com.poddrive.storage.SqlDelightEpisodeRepository
 import com.poddrive.storage.SqlDelightPodcastRepository
 import com.poddrive.usecase.AuthenticateWithSpotifyUseCase
+import com.poddrive.usecase.BuildEpisodeQueueUseCase
 import com.poddrive.usecase.RevokeSpotifyAccessUseCase
 import com.poddrive.usecase.SetEpisodeTierUseCase
 import com.poddrive.usecase.SyncPodcastLibraryUseCase
@@ -60,6 +64,15 @@ class PodDriveApplication : Application() {
     lateinit var setEpisodeTierUseCase: SetEpisodeTierUseCase
         private set
 
+    lateinit var buildEpisodeQueueUseCase: BuildEpisodeQueueUseCase
+        private set
+
+    lateinit var driveSessionRepository: DriveSessionRepository
+        private set
+
+    lateinit var driveSessionManager: DriveSessionManager
+        private set
+
     override fun onCreate() {
         super.onCreate()
 
@@ -100,6 +113,9 @@ class PodDriveApplication : Application() {
         val libraryApiClient = SpotifyLibraryApiClient(apiHttpClient)
         syncPodcastLibraryUseCase = SyncPodcastLibraryUseCase(libraryApiClient, podcastRepository, episodeRepository)
         setEpisodeTierUseCase = SetEpisodeTierUseCase(podcastRepository)
+        buildEpisodeQueueUseCase = BuildEpisodeQueueUseCase(episodeRepository)
+        driveSessionRepository = SqlDelightDriveSessionRepository(database)
+        driveSessionManager = DriveSessionManager(driveSessionRepository)
     }
 
     companion object {

@@ -19,6 +19,13 @@ sealed class AppError {
     /** Spotify API rate limit reached — request should be queued and retried. */
     object RateLimitExceeded : AppError()
 
+    /**
+     * Spotify deep-link handoff did not complete within the 3-second timeout (UX-DR10, Story 4.5).
+     * Triggers [com.poddrive.domain.model.DriveSessionState.Error] via
+     * [com.poddrive.usecase.HandlePlaybackFailureUseCase.awaitHandoffOrTimeout].
+     */
+    object SpotifyHandoffTimeout : AppError()
+
     /** Catch-all for unexpected errors. The only subtype that wraps a Throwable. */
     data class Unknown(val cause: Throwable) : AppError()
 }
