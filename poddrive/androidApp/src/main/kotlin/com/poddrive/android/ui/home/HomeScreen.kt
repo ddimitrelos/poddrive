@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -56,6 +57,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.poddrive.android.ui.drive.DriveSessionViewModel
 import com.poddrive.android.ui.settings.SettingsScreen
 import com.poddrive.domain.model.EpisodeTier
 import com.poddrive.domain.model.Podcast
@@ -64,7 +66,8 @@ import com.poddrive.domain.model.Podcast
 @Composable
 fun HomeScreen(
     onRevoked: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(),
+    driveViewModel: DriveSessionViewModel = viewModel()  // Story 3.3
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val uiState by viewModel.uiState.collectAsState()
@@ -104,7 +107,8 @@ fun HomeScreen(
                 paddingValues = paddingValues,
                 selectedFilter = selectedFilter,
                 onFilterSelected = viewModel::setFilter,
-                onLongPress = { viewModel.showTierSheet(it) }
+                onLongPress = { viewModel.showTierSheet(it) },
+                driveViewModel = driveViewModel
             )
             1 -> DiscoverPlaceholder(paddingValues = paddingValues)
             2 -> SettingsScreen(onRevoked = onRevoked)
@@ -186,7 +190,8 @@ private fun ShowsTabContent(
     paddingValues: PaddingValues,
     selectedFilter: EpisodeTier,
     onFilterSelected: (EpisodeTier) -> Unit,
-    onLongPress: (Podcast) -> Unit
+    onLongPress: (Podcast) -> Unit,
+    driveViewModel: DriveSessionViewModel
 ) {
     when (uiState) {
         is HomeViewModel.UiState.Loading -> {
@@ -208,7 +213,9 @@ private fun ShowsTabContent(
                 showFilter = true,
                 selectedFilter = selectedFilter,
                 onFilterSelected = onFilterSelected,
-                onLongPress = onLongPress
+                onLongPress = onLongPress,
+                isStale = uiState.isStale,
+                driveViewModel = driveViewModel
             )
         }
         is HomeViewModel.UiState.Error -> {
@@ -226,7 +233,9 @@ private fun ShowsTabContent(
                         showFilter = false,
                         selectedFilter = EpisodeTier.NONE,
                         onFilterSelected = {},
-                        onLongPress = onLongPress
+                        onLongPress = onLongPress,
+                        isStale = false,   // spec anti-pattern: no staleness banner in Error state
+                        driveViewModel = driveViewModel
                     )
                 }
             }
@@ -241,7 +250,9 @@ private fun PodcastList(
     showFilter: Boolean,  // P-13: false in Error state per spec anti-pattern
     selectedFilter: EpisodeTier,
     onFilterSelected: (EpisodeTier) -> Unit,
-    onLongPress: (Podcast) -> Unit
+    onLongPress: (Podcast) -> Unit,
+    driveViewModel: DriveSessionViewModel,
+    isStale: Boolean = false   // FR32: shows staleness banner when cache is >24 h old
 ) {
     LazyColumn(contentPadding = paddingValues) {
         item {
@@ -257,7 +268,29 @@ private fun PodcastList(
                         .heightIn(min = 3.dp)
                         .background(MaterialTheme.colorScheme.primary)
                 )
+                // Story 2.6 AC4 (UX-DR7): idle-state prompt shown until drive sessions are active.
+                Text(
+                    text = "Connect your car to start your first session",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
             }
+        }
+        // Story 3.3: Manual drive session trigger — FR13, UX-DR9 (≥64dp touch target)
+        item {
+            Button(
+                onClick = { driveViewModel.startManualDriveSession() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text("Start Drive")
+            }
+        }
+        if (isStale) {
+            item { StalenessBanner() }
         }
         if (showFilter) {
             item {
@@ -479,6 +512,23 @@ fun TierFilterTabRow(
             modifier = Modifier.semantics { role = Role.Tab }
         )
     }
+}
+
+/**
+ * Non-intrusive one-line caption shown when the library cache is >24 h old. (FR32)
+ * Uses tertiary text color per UX design system (color-text-tertiary #6B7280).
+ * Renders above the filter tabs so it is always visible regardless of tier selection.
+ */
+@Composable
+private fun StalenessBanner() {
+    Text(
+        text = "Last synced over 24 hours ago",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    )
 }
 
 @Composable
