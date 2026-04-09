@@ -36,7 +36,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-19
-last_updated: 2026-03-25  # updated: story 3.3 → done
+last_updated: 2026-04-09  # stories 4.1, 4.8, 4.9, 4.10, 4.11 → done (code review passed)
 project: BMAD Test
 project_key: NOKEY
 tracking_system: file-system
@@ -71,16 +71,22 @@ development_status:
   3-4-tts-spoken-briefing-generation-and-delivery: deferred
   # MVP Phase 2 — Voice Layer (deferred)
   3-5-audio-ducking-and-hands-free-playback-confirmation: deferred
-  3-6-drive-mode-ui-dashboard-screen: backlog
+  3-6-drive-mode-ui-dashboard-screen: done
   epic-3-retrospective: optional
 
   # Epic 4: Spotify Playback & Episode Queue
   epic-4: in-progress
-  4-1-spotify-episode-deep-link-handoff: backlog
-  4-2-priority-episode-queue: review
+  4-1-spotify-episode-deep-link-handoff: done
+  4-2-priority-episode-queue: done
   4-3-auto-advance-to-next-episode: backlog
   4-4-playback-position-resumption: backlog
-  4-5-spotify-playback-failure-handling: review
+  4-5-spotify-playback-failure-handling: done
+  4-6-spotify-episode-auto-play: done
+  4-7-active-device-polling-for-single-tap-playback: deferred  # superseded by ADR-002 (RSS+ExoPlayer)
+  4-8-rss-feed-discovery: done
+  4-9-episode-audio-url-resolution: done
+  4-10-exoplayer-integration: done
+  4-11-in-app-playback-controls: done
   epic-4-retrospective: optional
 
   # Epic 5: Empty Inbox & Smart Recommendations

@@ -16,5 +16,9 @@ interface PodcastRepository {
     /** Returns all podcasts for the given tier with unheard counts. */
     fun getByTierWithUnheardCount(tier: String): List<Podcast>
     /** Updates the tier for a single podcast by ID. Use EpisodeTier.NONE to remove the tag. */
-    fun setPodcastTier(id: String, tier: EpisodeTier)         // ← ADD (Story 2.2)
+    fun setPodcastTier(id: String, tier: EpisodeTier)
+    /** Stores the discovered RSS feed URL for a podcast (Story 4.8). */
+    fun updateRssFeedUrl(id: String, rssFeedUrl: String)
+    /** Returns a single podcast by ID with its unheard episode count, or null if not found (P7). */
+    suspend fun getById(id: String): Podcast?
 }

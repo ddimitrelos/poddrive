@@ -67,8 +67,26 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     // Story 1.3: expose HttpClient type used in PodDriveApplication
     implementation(libs.ktor.client.core)
+    // Story 2.5: WorkManager for background library sync
+    implementation(libs.androidx.work.runtime.ktx)
+    // Story 4.10: Media3 session for background playback (foreground service / MediaSession)
+    implementation(libs.androidx.media3.session)
+
+    // Debug only: SLF4J Android backend so Ktor HTTP logs appear in logcat
+    debugImplementation("org.slf4j:slf4j-android:1.7.36")
 
     debugImplementation(libs.compose.ui.tooling)
 
+    // Story 4.6: JVM unit tests for DriveSessionViewModel (constant verification)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    // Story 4.9: kxml2 provides a real XmlPullParserFactory implementation for JVM unit tests
+    // (avoids needing Robolectric to test RssParser which uses XmlPullParserFactory.newInstance())
+    testImplementation("net.sf.kxml:kxml2:2.3.0")
+
     androidTestImplementation(libs.androidx.test.runner)
+    // Story 4.11: Compose UI tests for DriveSessionScreenTest
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

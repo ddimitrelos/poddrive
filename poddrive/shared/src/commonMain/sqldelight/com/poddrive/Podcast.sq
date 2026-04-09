@@ -12,14 +12,18 @@ CREATE TABLE podcasts (
     episode_count INTEGER NOT NULL DEFAULT 0,
     tier TEXT NOT NULL DEFAULT 'NONE'
         CHECK (tier IN ('LOVED', 'LIKED', 'NONE')),
-    last_synced_at INTEGER NOT NULL DEFAULT 0
+    last_synced_at INTEGER NOT NULL DEFAULT 0,
+    rss_feed_url TEXT
 );
 
 selectAll:
 SELECT * FROM podcasts;
 
 selectById:
-SELECT * FROM podcasts WHERE id = ?;
+SELECT *, (SELECT COUNT(*) FROM episodes WHERE podcast_id = podcasts.id AND is_played = 0) AS unheard_count
+FROM podcasts
+WHERE id = :id
+LIMIT 1;
 
 selectByTier:
 SELECT * FROM podcasts WHERE tier = ?;
@@ -55,7 +59,7 @@ selectMostRecentSyncTime:
 SELECT COALESCE(MAX(last_synced_at), 0) FROM podcasts;
 
 selectAllWithUnheardCount:
-SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at,
+SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at, p.rss_feed_url,
        COALESCE(COUNT(e.id), 0) AS unheard_count
 FROM podcasts p
 LEFT JOIN episodes e ON p.id = e.podcast_id AND e.is_played = 0
@@ -63,10 +67,16 @@ GROUP BY p.id
 ORDER BY p.name ASC;
 
 selectAllWithUnheardCountByTier:
-SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at,
+SELECT p.id, p.name, p.description, p.image_url, p.episode_count, p.tier, p.last_synced_at, p.rss_feed_url,
        COALESCE(COUNT(e.id), 0) AS unheard_count
 FROM podcasts p
 LEFT JOIN episodes e ON p.id = e.podcast_id AND e.is_played = 0
 WHERE p.tier = ?
 GROUP BY p.id
 ORDER BY p.name ASC;
+
+updateRssFeedUrl:
+UPDATE podcasts SET rss_feed_url = :rssFeedUrl WHERE id = :id;
+
+selectRssFeedUrl:
+SELECT rss_feed_url FROM podcasts WHERE id = :id;

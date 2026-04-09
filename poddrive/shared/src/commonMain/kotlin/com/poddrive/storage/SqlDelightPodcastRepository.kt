@@ -45,7 +45,8 @@ class SqlDelightPodcastRepository(private val db: PodDrive) : PodcastRepository 
                 episodeCount = row.episode_count.toInt(),
                 unheardEpisodeCount = row.unheard_count.toInt(),
                 tier = EpisodeTier.entries.find { it.name == row.tier } ?: EpisodeTier.NONE,
-                lastSyncedAt = row.last_synced_at
+                lastSyncedAt = row.last_synced_at,
+                rssFeedUrl = row.rss_feed_url
             )
         }
 
@@ -59,11 +60,32 @@ class SqlDelightPodcastRepository(private val db: PodDrive) : PodcastRepository 
                 episodeCount = row.episode_count.toInt(),
                 unheardEpisodeCount = row.unheard_count.toInt(),
                 tier = EpisodeTier.entries.find { it.name == row.tier } ?: EpisodeTier.NONE,
-                lastSyncedAt = row.last_synced_at
+                lastSyncedAt = row.last_synced_at,
+                rssFeedUrl = row.rss_feed_url
             )
         }
 
     override fun setPodcastTier(id: String, tier: EpisodeTier) {
         db.podcastQueries.updateTier(tier = tier.name, id = id)
+    }
+
+    override fun updateRssFeedUrl(id: String, rssFeedUrl: String) {
+        db.podcastQueries.updateRssFeedUrl(rssFeedUrl = rssFeedUrl, id = id)
+    }
+
+    override suspend fun getById(id: String): Podcast? {
+        return db.podcastQueries.selectById(id).executeAsOneOrNull()?.let { row ->
+            Podcast(
+                id = row.id,
+                name = row.name,
+                description = row.description,
+                imageUrl = row.image_url,
+                episodeCount = row.episode_count.toInt(),
+                unheardEpisodeCount = row.unheard_count.toInt(),
+                tier = EpisodeTier.valueOf(row.tier),
+                lastSyncedAt = row.last_synced_at,
+                rssFeedUrl = row.rss_feed_url
+            )
+        }
     }
 }
