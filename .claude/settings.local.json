@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Read(*)",
+      "MultiEdit(*)",
       "Read(//c/Program Files/**)",
       "Read(//c/Program Files \\(x86\\)/**)",
       "Read(//c/Users/dimitrios.dimitrelos/AppData/Roaming/**)",
@@ -47,7 +52,19 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(git add:*)",
       "Bash(where java:*)",
-      "Bash(where gradle:*)"
+      "Bash(where gradle:*)",
+      "WebFetch(domain:developer.spotify.com)",
+      "WebFetch(domain:community.spotify.com)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:spotify.github.io)",
+      "WebFetch(domain:musically.com)",
+      "WebFetch(domain:www.webpronews.com)",
+      "WebFetch(domain:community.latenode.com)",
+      "WebFetch(domain:newsroom.spotify.com)",
+      "WebFetch(domain:techcrunch.com)",
+      "WebFetch(domain:engineering.atspotify.com)"
     ]
   }
 }
