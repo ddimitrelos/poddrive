@@ -194,10 +194,15 @@ class SpotifyAuthManager(
         /**
          * Minimum required Spotify OAuth scopes (NFR8).
          * DO NOT add scopes beyond this list without a product requirement.
+         *
+         * `user-modify-playback-state` is required by Story 4.6 (episode auto-play via
+         * PUT /v1/me/player/play). It works for free users on podcast content.
+         * `streaming` is NOT included — it is only needed for the Web Playback SDK
+         * (browser-based playback) and has no use on Android.
          */
         const val REQUIRED_SCOPES =
-            "user-library-read user-read-playback-state user-modify-playback-state " +
-                "user-read-recently-played streaming"
+            "user-library-read user-read-playback-state user-read-recently-played " +
+            "user-modify-playback-state"
 
         private val lenientJson = Json { ignoreUnknownKeys = true }
 

@@ -4,7 +4,9 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +19,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +31,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -131,7 +138,8 @@ fun DriveSessionScreen(
                         } else {
                             launchSpotifyEpisode(context, firstEpisode.id, viewModel)
                         }
-                    }
+                    },
+                    onMarkFinished = { episode -> viewModel.markEpisodeFinished(episode.id) }
                 )
             }
         }
@@ -179,7 +187,8 @@ private fun launchSpotifyEpisode(
 private fun DriveActiveContent(
     uiState: DriveUiState,
     onEpisodeTap: (Episode) -> Unit,
-    onOpenInSpotifyCta: () -> Unit
+    onOpenInSpotifyCta: () -> Unit,
+    onMarkFinished: (Episode) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         // Top "Open in Spotify" CTA — positioned at top to avoid Android nav bar overlap.
@@ -227,7 +236,8 @@ private fun DriveActiveContent(
                     EpisodeTileDrive(
                         episode = episode,
                         isHandingOff = uiState.isHandingOff && uiState.handoffEpisodeId == episode.id,
-                        onClick = { onEpisodeTap(episode) }
+                        onClick = { onEpisodeTap(episode) },
+                        onMarkFinished = { onMarkFinished(episode) }
                     )
                     HorizontalDivider()
                 }
@@ -239,40 +249,87 @@ private fun DriveActiveContent(
 
 /**
  * Single episode row in drive mode. One tap fires the deep-link (AC1, AC5 — ≤2 taps).
+ * Episodes published within the last 7 days are highlighted with [secondaryContainer].
+ * Long-press opens a context menu with "Mark as finished".
  * Touch target enforced via `heightIn(min = 72.dp)` (UX-DR9).
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun EpisodeTileDrive(
     episode: Episode,
     isHandingOff: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onMarkFinished: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 72.dp)
-            .clickable(enabled = !isHandingOff, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = episode.title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 2,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = formatDurationMs(episode.durationMs),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+    var showMenu by remember { mutableStateOf(false) }
+    val isRecent = isFromLastWeek(episode.publishedAt)
+    val backgroundColor = if (isRecent) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+    val titleColor = if (isRecent) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    val subtitleColor = if (isRecent) {
+        MaterialTheme.colorScheme.onSecondaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 72.dp)
+                .background(backgroundColor)
+                .combinedClickable(
+                    enabled = !isHandingOff,
+                    onClick = onClick,
+                    onLongClick = { showMenu = true }
+                )
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = episode.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    color = titleColor
+                )
+                Text(
+                    text = formatDurationMs(episode.durationMs),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = subtitleColor
+                )
+            }
+            if (episode.tier != EpisodeTier.NONE) {
+                TierBadgeIconOnly(tier = episode.tier)
+            }
         }
-        if (episode.tier != EpisodeTier.NONE) {
-            TierBadgeIconOnly(tier = episode.tier)
+        DropdownMenu(
+            expanded = showMenu,
+            onDismissRequest = { showMenu = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text("Mark as finished") },
+                onClick = {
+                    showMenu = false
+                    onMarkFinished()
+                }
+            )
         }
     }
+}
+
+/** Returns true if [publishedAt] (Unix ms) falls within the last 7 days. */
+private fun isFromLastWeek(publishedAt: Long): Boolean {
+    val oneWeekAgo = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1_000
+    return publishedAt >= oneWeekAgo
 }
 
 /**

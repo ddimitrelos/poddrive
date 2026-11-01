@@ -19,4 +19,16 @@ interface EpisodeRepository {
      * `episodes` with `episode_tiers` to resolve each episode's effective tier.
      */
     fun getUnplayedOrderedByTier(): List<Episode>
+
+    /**
+     * Marks the episode with [episodeId] as played (`is_played = 1`).
+     * Called after a successful Spotify deep-link handoff (Story 4.1, AC4).
+     */
+    fun markPlayed(episodeId: String)
+
+    /** Stores the resolved direct audio URL for an episode (Story 4.9). Write-once in normal operation. */
+    fun updateAudioUrl(id: String, audioUrl: String)
+
+    /** Returns all unplayed episodes for [podcastId] that do not yet have an audio_url (Story 4.9). */
+    fun getUnresolvedEpisodesForPodcast(podcastId: String): List<Episode>
 }

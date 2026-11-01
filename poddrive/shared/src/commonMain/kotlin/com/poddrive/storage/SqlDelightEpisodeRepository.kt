@@ -38,7 +38,36 @@ class SqlDelightEpisodeRepository(private val db: PodDrive) : EpisodeRepository 
                 durationMs = row.duration_ms,
                 publishedAt = row.published_at,
                 isPlayed = row.is_played != 0L,
-                tier = EpisodeTier.valueOf(row.tier)
+                tier = EpisodeTier.entries.firstOrNull { it.name == row.tier }
+                    ?: run {
+                        // commonMain cannot use android.util.Log — System.err maps to Logcat
+                        // tag "System.err" at WARN level on Android, which is visible in logcat.
+                        System.err.println("W/SqlDelightEpisodeRepository: Unknown EpisodeTier '${row.tier}' for episode ${row.id}, defaulting to NONE")
+                        EpisodeTier.NONE
+                    },
+                audioUrl = row.audio_url
+            )
+        }
+
+    override fun markPlayed(episodeId: String) {
+        db.episodeQueries.markPlayed(episodeId)
+    }
+
+    override fun updateAudioUrl(id: String, audioUrl: String) {
+        db.episodeQueries.updateAudioUrl(audioUrl = audioUrl, id = id)
+    }
+
+    override fun getUnresolvedEpisodesForPodcast(podcastId: String): List<Episode> =
+        db.episodeQueries.selectUnresolvedEpisodesForPodcast(podcastId).executeAsList().map { row ->
+            Episode(
+                id = row.id,
+                podcastId = row.podcast_id,
+                title = row.title,
+                durationMs = row.duration_ms,
+                publishedAt = row.published_at,
+                isPlayed = row.is_played != 0L,
+                tier = EpisodeTier.NONE,  // tier not needed for resolution; join omitted for performance
+                audioUrl = row.audio_url
             )
         }
 }

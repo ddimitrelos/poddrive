@@ -17,14 +17,19 @@ class BuildEpisodeQueueUseCaseTest {
 
     private class FakeEpisodeRepository(
         private val orderedEpisodes: List<Episode> = emptyList(),
-        private val shouldThrow: Boolean = false
+        private val shouldThrow: Boolean = false,
+        private val throwCancellation: Boolean = false
     ) : EpisodeRepository {
         override fun upsertAll(episodes: List<Episode>) = Unit
         override fun getUnheardCountForPodcast(podcastId: String): Int = 0
         override fun getUnplayedOrderedByTier(): List<Episode> {
+            if (throwCancellation) throw kotlinx.coroutines.CancellationException("cancelled")
             if (shouldThrow) throw RuntimeException("DB failure")
             return orderedEpisodes
         }
+        override fun markPlayed(episodeId: String) = Unit
+        override fun updateAudioUrl(id: String, audioUrl: String) = Unit
+        override fun getUnresolvedEpisodesForPodcast(podcastId: String): List<Episode> = emptyList()
     }
 
     private fun ep(id: String, tier: EpisodeTier, publishedAt: Long = 0L) =
@@ -74,5 +79,17 @@ class BuildEpisodeQueueUseCaseTest {
         val result = BuildEpisodeQueueUseCase(FakeEpisodeRepository(shouldThrow = true)).execute()
         assertIs<Result.Failure<*>>(result)
         assertIs<AppError.Unknown>((result as Result.Failure).error)
+    }
+
+    @Test
+    fun `CancellationException from repository is re-thrown and not wrapped`() = runTest {
+        // AR3: CancellationException must always propagate — never swallowed as AppError.Unknown
+        var threw = false
+        try {
+            BuildEpisodeQueueUseCase(FakeEpisodeRepository(throwCancellation = true)).execute()
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            threw = true
+        }
+        assertTrue(threw, "CancellationException must be re-thrown, not wrapped in AppError.Unknown")
     }
 }

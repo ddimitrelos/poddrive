@@ -23,6 +23,9 @@
 #   - review: Ready for code review (via Dev's code-review workflow)
 #   - done: Story completed
 #   - deferred: Story excluded from current MVP scope; planned for a future phase
+#   - retired: Story removed from product scope entirely (see sprint-change-proposal for rationale)
+#   - superseded: Story completed but replaced by a different approach; code may remain but is not in MVP path
+#   - redirected: Story's intent redirected to a different epic/story (see comment for pointer)
 #
 # Retrospective Status:
 #   - optional: Can be completed but not required
@@ -36,7 +39,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-19
-last_updated: 2026-04-09  # stories 4.1, 4.8, 4.9, 4.10, 4.11 → done (code review passed)
+last_updated: 2026-04-24  # Sprint Change Proposal 2026-04-24 approved: pivot to podcast-list-centric UX (see _bmad-output/planning-artifacts/sprint-change-proposal-2026-04-24.md)
 project: BMAD Test
 project_key: NOKEY
 tracking_system: file-system
@@ -63,7 +66,10 @@ development_status:
   epic-2-retrospective: optional
 
   # Epic 3: Drive Session & Spoken Briefing
-  epic-3: in-progress
+  # SUPERSEDED by Sprint Change Proposal 2026-04-24 — pivot to podcast-list-centric UX.
+  # Built code (3.1, 3.2, 3.3, 3.6) kept as-is but not in next version's primary nav path.
+  # Voice layer stories (3.4, 3.5) remain deferred to a future phase (not retired).
+  epic-3: superseded
   3-1-drive-session-state-machine-and-background-service: done
   3-2-bluetooth-audio-device-detection-and-auto-session-activation: done
   3-3-manual-drive-session-trigger: done
@@ -75,11 +81,13 @@ development_status:
   epic-3-retrospective: optional
 
   # Epic 4: Spotify Playback & Episode Queue
+  # RESCOPED by Sprint Change Proposal 2026-04-24 — queue concept retired.
+  # Playback plumbing stories (4.1, 4.5, 4.6, 4.8, 4.9, 4.10, 4.11) remain valid foundation for Epic 8.
   epic-4: in-progress
   4-1-spotify-episode-deep-link-handoff: done
-  4-2-priority-episode-queue: done
-  4-3-auto-advance-to-next-episode: backlog
-  4-4-playback-position-resumption: backlog
+  4-2-priority-episode-queue: retired  # RETIRED 2026-04-24 — queue concept removed; production code removal pending (surgical, not git revert)
+  4-3-auto-advance-to-next-episode: retired  # RETIRED 2026-04-24 — never built, no queue to advance through
+  4-4-playback-position-resumption: redirected  # REDIRECTED 2026-04-24 → replaced by 8-9-continue-listening-bar
   4-5-spotify-playback-failure-handling: done
   4-6-spotify-episode-auto-play: done
   4-7-active-device-polling-for-single-tap-playback: deferred  # superseded by ADR-002 (RSS+ExoPlayer)
@@ -90,9 +98,11 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Empty Inbox & Smart Recommendations
-  epic-5: backlog
-  5-1-empty-inbox-recommendation-generation: backlog
-  # MVP Phase 2 — Voice Layer (deferred)
+  # REDIRECTED by Sprint Change Proposal 2026-04-24 — empty-inbox recommendation concept
+  # redirected into home-screen "Explore Mode" (Epic 8 Story 8.10).
+  epic-5: redirected  # → Epic 8
+  5-1-empty-inbox-recommendation-generation: redirected  # → 8-10-home-screen-explore-mode
+  # MVP Phase 2 — Voice Layer (deferred; drive-session-specific, not redirected)
   5-2-hands-free-accept-or-decline-of-recommendation: deferred
   epic-5-retrospective: optional
 
@@ -110,3 +120,22 @@ development_status:
   7-3-design-token-system-implementation: backlog
   7-4-accessibility-compliance-and-responsive-design: backlog
   epic-7-retrospective: optional
+
+  # Epic 8: Podcast-List Home Screen (NEW)
+  # Introduced by Sprint Change Proposal 2026-04-24 to realize the pivot to a
+  # podcast-list-centric UX. Stories derived from brainstorming-session-2026-04-24-1200.md.
+  # Stories 8.1–8.8 are Core MVP (must ship together); 8.9, 8.10 are fast-follow.
+  # Story specs not yet created — awaiting PRD/Architecture/UX revisions, then
+  # bmad-create-epics-and-stories to formalize story files.
+  epic-8: backlog
+  8-1-three-band-podcast-list-sort: backlog
+  8-2-no-unlistened-invisible-filter: backlog
+  8-3-per-tile-quick-play-button: backlog
+  8-4-expand-in-place-drill-down: backlog
+  8-5-unlistened-count-freshness-color: backlog
+  8-6-manual-tier-promotion-from-tile: backlog
+  8-7-show-all-library-screen: backlog
+  8-8-driver-friendly-visual-baseline: backlog
+  8-9-continue-listening-bar: backlog
+  8-10-home-screen-explore-mode: backlog
+  epic-8-retrospective: optional

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug-only manifest overlay.
+  Declares ComponentActivity so createAndroidComposeRule<ComponentActivity>() can launch
+  it during instrumented tests. In non-KMP apps this is usually handled automatically by
+  the ui-test-manifest AAR, but in KMP projects that AAR's manifest is not merged by AGP.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name="androidx.activity.ComponentActivity"
+            android:exported="true" />
+    </application>
+</manifest>

@@ -62,6 +62,10 @@ kotlin {
             implementation(libs.androidx.security.crypto)
             // Story 1.3: Ktor CIO engine for Android
             implementation(libs.ktor.client.cio)
+            // Story 3.2: ContextCompat.registerReceiver() for BluetoothTrigger
+            implementation(libs.androidx.core.ktx)
+            // Story 4.10: ExoPlayer for in-app audio playback (actual AudioPlayer implementation)
+            implementation(libs.androidx.media3.exoplayer)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)

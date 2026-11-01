@@ -327,6 +327,22 @@ class DriveSessionViewModel(
         positionPollingJob = null
     }
 
+    /**
+     * Marks an episode as finished (played) from the long-press context menu in the queue.
+     * Removes the episode from the visible queue immediately after the DB write.
+     */
+    fun markEpisodeFinished(episodeId: String) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                podApp.markEpisodePlayedUseCase.execute(episodeId)
+            }
+            if (result is com.poddrive.domain.model.Result.Failure) {
+                Log.w(TAG, "markEpisodeFinished failed for episode $episodeId: ${result.error}")
+            }
+            loadEpisodeQueue()
+        }
+    }
+
     /** Loads (or reloads) the episode queue from the repository into [uiState]. */
     fun loadEpisodeQueue() {
         viewModelScope.launch {

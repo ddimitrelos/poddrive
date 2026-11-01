@@ -30,13 +30,22 @@ import kotlinx.coroutines.CancellationException
 class SyncPodcastLibraryUseCase(
     private val libraryApiClient: SpotifyLibraryApiClient,
     private val podcastRepository: PodcastRepository,
-    private val episodeRepository: EpisodeRepository
+    private val episodeRepository: EpisodeRepository,
+    private val resolvePodcastRssFeedUseCase: ResolvePodcastRssFeedUseCase? = null,
+    private val resolveEpisodeAudioUrlsUseCase: ResolveEpisodeAudioUrlsUseCase? = null
 ) {
     suspend fun execute(): Result<List<Podcast>, AppError> {
         return try {
             // 1. Fetch all followed shows
             val showsResult = libraryApiClient.fetchFollowedShows()
-            if (showsResult is Result.Failure) return showsResult
+            if (showsResult is Result.Failure) {
+                // FR8: Offline with existing cache → serve transparently (no error banner)
+                if (showsResult.error is AppError.NetworkUnavailable) {
+                    val cached = podcastRepository.getAllWithUnheardCount()
+                    return if (cached.isNotEmpty()) Result.Success(cached) else showsResult
+                }
+                return showsResult  // non-network errors (401, 403, 429) always propagate
+            }
 
             val shows = (showsResult as Result.Success).value
             val now = currentTimeMillis()
@@ -58,6 +67,16 @@ class SyncPodcastLibraryUseCase(
             // 3. Upsert podcasts (preserves existing tiers)
             podcastRepository.upsertAll(podcasts)
 
+            // 3b. Discover RSS feed URLs for unresolved podcasts (Story 4.8)
+            // ResolvePodcastRssFeedUseCase guards against redundant calls internally (AC4).
+            // Re-read from repo so rssFeedUrl reflects stored state (including already-resolved).
+            val podcastsForRssResolution = podcastRepository.getAllWithUnheardCount()
+            resolvePodcastRssFeedUseCase?.let { resolver ->
+                for (podcast in podcastsForRssResolution) {
+                    resolver.execute(podcast)
+                }
+            }
+
             // 4. For each show, fetch episodes and upsert
             for (show in shows) {
                 val episodesResult = libraryApiClient.fetchShowEpisodes(show.id)
@@ -78,6 +97,17 @@ class SyncPodcastLibraryUseCase(
                         )
                     }
                 episodeRepository.upsertAll(episodes)
+            }
+
+            // 4b. Resolve audio URLs from RSS for podcasts with a known feed URL (Story 4.9)
+            // Re-read from repo so rssFeedUrl includes any value resolved in step 3b.
+            // The use case internally skips episodes whose audio_url is already set (AC6).
+            resolveEpisodeAudioUrlsUseCase?.let { resolver ->
+                for (podcast in podcastRepository.getAllWithUnheardCount()) {
+                    if (podcast.rssFeedUrl != null) {
+                        resolver.execute(podcast)
+                    }
+                }
             }
 
             // 5. Return updated library with unheard counts from DB

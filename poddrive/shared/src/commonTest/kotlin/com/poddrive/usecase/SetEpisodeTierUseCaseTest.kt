@@ -29,6 +29,9 @@ class SetEpisodeTierUseCaseTest {
             shouldThrow?.let { throw it }
             tierUpdates.add(TierUpdate(id, tier))
         }
+
+        override fun updateRssFeedUrl(id: String, rssFeedUrl: String) = Unit
+        override suspend fun getById(id: String): Podcast? = null
     }
 
     // -----------------------------------------------------------------------

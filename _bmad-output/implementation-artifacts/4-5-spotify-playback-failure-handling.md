@@ -1,5 +1,5 @@
 ---
-status: review
+status: done
 story_id: "4.5"
 story_key: 4-5-spotify-playback-failure-handling
 epic: 4
@@ -19,10 +19,13 @@ so that I'm aware of the issue and can retry safely while driving.
 ## Acceptance Criteria
 
 **AC1 — App transitions to Error state on playback failure; does not crash**
-**Given** a drive session is active (state is `Activating`, `Briefing`, or `Playing`)
+**Given** a drive session is active (state is `Activating`, `Briefing`, `Playing`, or `Paused`)
 **When** a Spotify playback failure or deep-link timeout occurs
 **Then** the app does not crash — `DriveSessionManager` dispatches `PlaybackFailed(error)` (FR25, NFR12)
 **And** `DriveSessionState` transitions to `Error(error)`
+**Note:** `Paused` is included as a valid source state (IG-2 code review finding) — a failure can
+occur while playback is paused (e.g. Spotify disconnects mid-pause). Covered by test
+`resolveTransition Paused + PlaybackFailed = Error` in `DriveSessionManagerTest`.
 
 **AC2 — Voice notification (deferred to Story 3.4)**
 **Given** `DriveSessionState` transitions to `Error`

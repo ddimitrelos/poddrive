@@ -8,6 +8,7 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -60,6 +61,21 @@ fun createAuthHttpClient(): HttpClient =
  *
  * [Source: architecture.md#API & Communication Patterns]
  */
+/**
+ * Creates a plain [HttpClient] for calling unauthenticated public APIs (e.g. iTunes Search).
+ *
+ * Does NOT install the Auth plugin — never attaches Spotify bearer tokens.
+ * Configured with ContentNegotiation + JSON so callers can parse responses normally.
+ *
+ * [Source: Story 4.8, Story 4.9 — iTunes Search API and RSS feed fetching]
+ */
+fun createItunesHttpClient(): HttpClient =
+    HttpClient(createPlatformEngine()) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+
 fun createSpotifyHttpClient(
     tokenStorage: SecureTokenStorage,
     tokenRefresher: TokenRefresher? = null
@@ -69,7 +85,10 @@ fun createSpotifyHttpClient(
             json(Json { ignoreUnknownKeys = true })
         }
         install(Logging) {
-            level = LogLevel.INFO
+            level = LogLevel.ALL
+            logger = object : Logger {
+                override fun log(message: String) = println("KTOR>> $message")
+            }
         }
         install(Auth) {
             bearer {

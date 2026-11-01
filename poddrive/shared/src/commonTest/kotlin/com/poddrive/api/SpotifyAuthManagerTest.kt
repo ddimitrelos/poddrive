@@ -132,18 +132,31 @@ class SpotifyAuthManagerTest {
     }
 
     @Test
-    fun `buildAuthorizationUrl contains all five required scopes`() {
+    fun `buildAuthorizationUrl contains all required scopes`() {
         val url = buildTestUrl()
+        // Story 4.6 adds user-modify-playback-state for episode auto-play (PUT /v1/me/player/play).
+        // `streaming` is intentionally excluded — it is for the Web Playback SDK (browser only).
         val requiredScopes = listOf(
             "user-library-read",
             "user-read-playback-state",
-            "user-modify-playback-state",
             "user-read-recently-played",
-            "streaming"
+            "user-modify-playback-state"
         )
         requiredScopes.forEach { scope ->
             assertTrue(url.contains(scope), "URL must include scope: $scope")
         }
+    }
+
+    @Test
+    fun `buildAuthorizationUrl does NOT include streaming scope`() {
+        // `streaming` is the Web Playback SDK scope (browser-only; not applicable to Android).
+        // It was explicitly removed in Story 4.6. This test guards against accidental
+        // re-introduction: if `streaming` is added back to REQUIRED_SCOPES, this test fails.
+        val url = buildTestUrl()
+        assertFalse(
+            url.contains("streaming"),
+            "URL must NOT include 'streaming' scope — it is browser-only (Web Playback SDK)"
+        )
     }
 
     @Test

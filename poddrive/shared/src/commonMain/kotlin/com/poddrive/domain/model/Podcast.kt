@@ -15,5 +15,7 @@ data class Podcast(
     /** Number of unheard (is_played = 0) episodes from the local SQLDelight cache. Computed at query time via JOIN — not stored as a column. (FR7) */
     val unheardEpisodeCount: Int,
     val tier: EpisodeTier,
-    val lastSyncedAt: Long
+    val lastSyncedAt: Long,
+    /** RSS feed URL discovered via iTunes Search API (Story 4.8). Null until resolved; null on failure. */
+    val rssFeedUrl: String? = null
 )

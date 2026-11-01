@@ -89,3 +89,23 @@ data class SpotifyResumePoint(
     @SerialName("fully_played") val fullyPlayed: Boolean,
     @SerialName("resume_position_ms") val resumePositionMs: Long = 0L
 )
+
+// ─── Search (GET /v1/search?type=show) ──────────────────────────────────────
+
+@Serializable
+data class SpotifySearchResponse(
+    @SerialName("shows") val shows: SpotifySearchShowsPage
+)
+
+@Serializable
+data class SpotifySearchShowsPage(
+    @SerialName("items") val items: List<SpotifyShow> = emptyList()
+)
+
+// ─── Player state (GET /v1/me/player) ───────────────────────────────────────
+
+@Serializable
+data class ActivePlayerResponse(val device: DeviceInfo? = null)
+
+@Serializable
+data class DeviceInfo(val id: String)

@@ -52,6 +52,12 @@ class SpotifyLibraryApiClient(private val httpClient: HttpClient) {
             Result.Success(items.map { it.show })
         } catch (e: CancellationException) {
             throw e
+        } catch (e: kotlinx.io.IOException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.ConnectTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.SocketTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
         } catch (e: Exception) {
             Result.Failure(AppError.Unknown(e))
         }
@@ -91,6 +97,47 @@ class SpotifyLibraryApiClient(private val httpClient: HttpClient) {
             Result.Success(items)
         } catch (e: CancellationException) {
             throw e
+        } catch (e: kotlinx.io.IOException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.ConnectTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.SocketTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: Exception) {
+            Result.Failure(AppError.Unknown(e))
+        }
+    }
+
+    /**
+     * Searches for Spotify podcast shows matching [query].
+     * Returns up to 20 results ordered by Spotify relevance.
+     * Passes `market=from_token` so images and metadata match the user's locale.
+     *
+     * Requires scope: `user-library-read` (bearer token already ensures authentication).
+     */
+    suspend fun searchShows(query: String): Result<List<SpotifyShow>, AppError> {
+        return try {
+            val response = httpClient.get("$BASE_URL/v1/search") {
+                parameter("q", query)
+                parameter("type", "show")
+                parameter("limit", 20)
+                parameter("market", "from_token")
+            }
+            if (!response.status.isSuccess()) {
+                return Result.Failure(
+                    AppError.SpotifyApiError(response.status.value, response.status.description)
+                )
+            }
+            val body = response.body<SpotifySearchResponse>()
+            Result.Success(body.shows.items)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: kotlinx.io.IOException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.ConnectTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
+        } catch (e: io.ktor.client.network.sockets.SocketTimeoutException) {
+            Result.Failure(AppError.NetworkUnavailable)
         } catch (e: Exception) {
             Result.Failure(AppError.Unknown(e))
         }

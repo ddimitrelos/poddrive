@@ -1,5 +1,5 @@
 ---
-status: review
+status: done
 story_id: "4.2"
 story_key: 4-2-priority-episode-queue
 epic: 4

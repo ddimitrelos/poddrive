@@ -1,5 +1,6 @@
 package com.poddrive.usecase
 
+import com.poddrive.api.ItunesPodcastSearchClient
 import com.poddrive.api.SpotifyLibraryApiClient
 import com.poddrive.domain.model.AppError
 import com.poddrive.domain.model.Episode
@@ -53,6 +54,35 @@ class SyncPodcastLibraryUseCaseTest {
             stored.filter { it.tier.name == tier }
 
         override fun setPodcastTier(id: String, tier: EpisodeTier) = Unit
+        override fun updateRssFeedUrl(id: String, rssFeedUrl: String) = Unit
+        override suspend fun getById(id: String): Podcast? = null
+    }
+
+    private fun makeFakeRssResolver(): FakeResolvePodcastRssFeedUseCase {
+        val noOpEngine = MockEngine { _ ->
+            respond(
+                content = """{"resultCount":0,"results":[]}""",
+                status = HttpStatusCode.OK,
+                headers = headersOf("Content-Type", ContentType.Application.Json.toString())
+            )
+        }
+        val noOpClient = ItunesPodcastSearchClient(
+            HttpClient(noOpEngine) {
+                install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+            }
+        )
+        val noOpRepo = FakePodcastRepository()
+        return FakeResolvePodcastRssFeedUseCase(noOpRepo, noOpClient)
+    }
+
+    private class FakeResolvePodcastRssFeedUseCase(
+        noOpRepo: PodcastRepository,
+        noOpClient: ItunesPodcastSearchClient
+    ) : ResolvePodcastRssFeedUseCase(noOpRepo, noOpClient) {
+        val calledFor = mutableListOf<Podcast>()
+        override suspend fun execute(podcast: Podcast) {
+            calledFor.add(podcast)
+        }
     }
 
     private class FakeEpisodeRepository : EpisodeRepository {
@@ -66,6 +96,9 @@ class SyncPodcastLibraryUseCaseTest {
             upserted.count { it.podcastId == podcastId && !it.isPlayed }
 
         override fun getUnplayedOrderedByTier(): List<Episode> = emptyList()
+        override fun markPlayed(episodeId: String) = Unit
+        override fun updateAudioUrl(id: String, audioUrl: String) = Unit
+        override fun getUnresolvedEpisodesForPodcast(podcastId: String): List<Episode> = emptyList()
     }
 
     // -----------------------------------------------------------------------
@@ -78,7 +111,8 @@ class SyncPodcastLibraryUseCaseTest {
         showsStatus: HttpStatusCode = HttpStatusCode.OK,
         episodesStatus: HttpStatusCode = HttpStatusCode.OK,
         podcastRepo: FakePodcastRepository = FakePodcastRepository(),
-        episodeRepo: FakeEpisodeRepository = FakeEpisodeRepository()
+        episodeRepo: FakeEpisodeRepository = FakeEpisodeRepository(),
+        rssResolver: ResolvePodcastRssFeedUseCase? = null
     ): Triple<SyncPodcastLibraryUseCase, FakePodcastRepository, FakeEpisodeRepository> {
         val engine = MockEngine { request ->
             val url = request.url.toString()
@@ -106,7 +140,7 @@ class SyncPodcastLibraryUseCaseTest {
             }
         }
         val apiClient = SpotifyLibraryApiClient(httpClient)
-        val useCase = SyncPodcastLibraryUseCase(apiClient, podcastRepo, episodeRepo)
+        val useCase = SyncPodcastLibraryUseCase(apiClient, podcastRepo, episodeRepo, rssResolver)
         return Triple(useCase, podcastRepo, episodeRepo)
     }
 
@@ -139,6 +173,21 @@ class SyncPodcastLibraryUseCaseTest {
         assertTrue(
             upsertedIds.all { it.startsWith("spotify:show:") },
             "Podcast.id must use full Spotify URI, not base ID"
+        )
+    }
+
+    @Test
+    fun `execute - resolvePodcastRssFeedUseCase called once per upserted podcast`() = runTest {
+        val rssResolver = makeFakeRssResolver()
+        val (useCase, podcastRepo, _) = makeUseCase(rssResolver = rssResolver)
+
+        useCase.execute()
+
+        // One podcast in SHOWS_JSON → resolver must be called exactly once
+        assertEquals(
+            podcastRepo.stored.size,
+            rssResolver.calledFor.size,
+            "ResolvePodcastRssFeedUseCase must be called once per podcast in the library"
         )
     }
 

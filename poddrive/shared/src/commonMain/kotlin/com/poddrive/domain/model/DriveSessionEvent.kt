@@ -43,4 +43,16 @@ sealed class DriveSessionEvent {
      * Transitions [DriveSessionState.Error] back to [DriveSessionState.Activating].
      */
     object RetryPlayback : DriveSessionEvent()
+
+    /**
+     * User tapped an episode tile with a resolved [com.poddrive.domain.model.Episode.audioUrl]
+     * and ExoPlayer has started playing it in-app (Story 4.10, AC7).
+     *
+     * Transitions [DriveSessionState.Activating] or [DriveSessionState.Playing] →
+     * [DriveSessionState.Playing] with the new [episode] and positionMs = 0.
+     *
+     * Dispatched by [com.poddrive.android.ui.drive.DriveSessionViewModel.onEpisodeTapped]
+     * immediately after [com.poddrive.audio.AudioPlayer.play] is called.
+     */
+    data class EpisodeStarted(val episode: Episode) : DriveSessionEvent()
 }

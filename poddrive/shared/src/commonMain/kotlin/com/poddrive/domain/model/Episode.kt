@@ -14,5 +14,7 @@ data class Episode(
     val durationMs: Long,
     val publishedAt: Long,
     val isPlayed: Boolean,
-    val tier: EpisodeTier
+    val tier: EpisodeTier,
+    /** Direct audio URL resolved from the podcast's RSS feed (Story 4.9). Null until resolved. */
+    val audioUrl: String? = null
 )

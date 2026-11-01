@@ -81,6 +81,11 @@ class SqlDelightDriveSessionRepository(private val db: PodDrive) : DriveSessionR
         "Paused"     -> DriveSessionState.Paused
         "Error"      -> DriveSessionState.Error(AppError.Unknown(RuntimeException("restored error state")))
         "Ended"      -> DriveSessionState.Ended
-        else         -> DriveSessionState.Idle  // Fallback for unknown/corrupted state
+        else         -> {
+            // P-8: warn on unknown state strings — could indicate DB corruption or a future
+            // schema version. Falling back to Idle to allow the app to continue operating.
+            println("WARN SqlDelightDriveSessionRepository: unknown state '$stateStr' — defaulting to Idle")
+            DriveSessionState.Idle
+        }
     }
 }

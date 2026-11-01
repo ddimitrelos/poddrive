@@ -26,15 +26,17 @@ import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
- * Welcome / onboarding screen.
- * Shows "Connect Spotify" button → opens Chrome Custom Tab for PKCE OAuth.
- * Displays inline error with retry on failure (AC5).
- * Notifies [onAuthenticated] when tokens are successfully stored (AC3).
+ * Welcome / onboarding screen dispatcher.
+ *
+ * Handles all [OnboardingUiState] values:
+ *  - Idle, LaunchingBrowser, ExchangingTokens, Error → OAuth flow (Stories 1.x)
+ *  - CheckingLibrary → shows a spinner while the library skip-check runs (Story 2.6 AC5)
+ *  - AddFirstShow → delegates to [AddFirstShowScreen] (Story 2.6 AC1–AC3)
+ *  - Authenticated → calls [onAuthenticated] to navigate to HomeScreen
  *
  * Note: If Spotify is not installed, the Custom Tab browser still works because
- * Spotify OAuth uses a standard web flow. The "Spotify not installed" check (AC4)
+ * Spotify OAuth uses a standard web flow. The "Spotify not installed" check (AC4 of Story 1.3)
  * is relevant only if the app later attempts to deep-link into the Spotify app.
- * At this stage, we gracefully handle ActivityNotFoundException from the browser intent.
  */
 @Composable
 fun OnboardingScreen(
@@ -44,14 +46,27 @@ fun OnboardingScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // P2-1: Use LaunchedEffect to avoid calling onAuthenticated() during composition,
-    // which would fire on every recomposition while state remains Authenticated.
+    // P2-1: Use LaunchedEffect to avoid calling onAuthenticated() during composition.
     LaunchedEffect(uiState) {
         if (uiState is OnboardingUiState.Authenticated) {
             onAuthenticated()
         }
     }
 
+    // AddFirstShow is a full-screen step — render outside the centred OAuth column.
+    if (uiState is OnboardingUiState.AddFirstShow) {
+        AddFirstShowScreen(
+            state = uiState as OnboardingUiState.AddFirstShow,
+            onQueryChanged = viewModel::onSearchQueryChanged,
+            onShowSelected = viewModel::onShowSelected,
+            onTierSelected = { tier, andProceed -> viewModel.onTierSelected(tier, andProceed) },
+            onDone = viewModel::proceedToHome,
+            onSkip = viewModel::proceedToHome
+        )
+        return
+    }
+
+    // OAuth / checking-library column layout
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,6 +116,13 @@ fun OnboardingScreen(
                 CircularProgressIndicator()
             }
 
+            is OnboardingUiState.CheckingLibrary -> {
+                // Story 2.6 AC5: checking whether the user already has followed shows.
+                Text("Setting up your library…")
+                Spacer(Modifier.height(16.dp))
+                CircularProgressIndicator()
+            }
+
             is OnboardingUiState.Error -> {
                 Text(
                     text = (uiState as OnboardingUiState.Error).message,
@@ -122,6 +144,10 @@ fun OnboardingScreen(
 
             is OnboardingUiState.Authenticated -> {
                 // handled via LaunchedEffect above — won't render content here
+            }
+
+            is OnboardingUiState.AddFirstShow -> {
+                // handled by early-return branch above — unreachable here
             }
         }
     }

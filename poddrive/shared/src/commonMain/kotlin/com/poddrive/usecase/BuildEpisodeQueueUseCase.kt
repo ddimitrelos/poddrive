@@ -5,6 +5,8 @@ import com.poddrive.domain.model.EpisodeQueue
 import com.poddrive.domain.model.Result
 import com.poddrive.repository.EpisodeRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Builds the prioritised episode queue for a drive session (FR22, Story 4.2).
@@ -29,7 +31,11 @@ class BuildEpisodeQueueUseCase(private val episodeRepository: EpisodeRepository)
      */
     suspend fun execute(): Result<EpisodeQueue, AppError> {
         return try {
-            val episodes = episodeRepository.getUnplayedOrderedByTier()
+            // P-13: getUnplayedOrderedByTier() is a synchronous SQLDelight call — switch to
+            // Dispatchers.IO so it never blocks the main thread (AR3).
+            val episodes = withContext(Dispatchers.IO) {
+                episodeRepository.getUnplayedOrderedByTier()
+            }
             Result.Success(EpisodeQueue(episodes))
         } catch (e: CancellationException) {
             throw e
